@@ -48,6 +48,7 @@ export interface Bus {
   depot?: string;
   via?: string[];
   route?: string;
+  crowdLevel?: "low" | "medium" | "high" | "full";
   location?: {
     lat: number;
     lng: number;

@@ -23,9 +23,26 @@ const Auth = () => {
     if (roleParam) setRole(roleParam);
   }, [searchParams]);
 
+  const navigateByRole = (userRole?: string) => {
+    const lowerRole = (userRole || 'user').toLowerCase();
+    if (lowerRole === 'admin') navigate('/admin');
+    else if (lowerRole === 'driver') navigate('/driver');
+    else navigate('/dashboard');
+  };
+
   const handleSubmit = async (data: Record<string, string>) => {
     setIsLoading(true);
     try {
+      // Google login already handled in AuthForm — just redirect
+      if ((data as any)?._skipForm) {
+        const currentUser = await authService.getCurrentUser();
+        if (currentUser) {
+          toast.success("Google login successful!");
+          navigateByRole(currentUser.role);
+        }
+        return;
+      }
+
       if (mode === 'login') {
         const response = await authService.login({
           email: data.email,
@@ -35,8 +52,7 @@ const Auth = () => {
 
         if (response.success) {
           toast.success("Login successful!");
-          const lowerRole = response.user?.role?.toLowerCase() || 'user';
-          navigate(lowerRole === 'admin' ? '/admin' : lowerRole === 'driver' ? '/driver' : '/');
+          navigateByRole(response.user?.role);
         } else {
           toast.error(response.error || "Login failed");
         }
@@ -58,8 +74,7 @@ const Auth = () => {
 
         if (response.success) {
           toast.success("Account created successfully!");
-          const lowerRole = response.user?.role?.toLowerCase() || 'user';
-          navigate(lowerRole === 'admin' ? '/admin' : lowerRole === 'driver' ? '/driver' : '/');
+          navigateByRole(response.user?.role);
         } else {
           toast.error(response.error || "Registration failed");
         }

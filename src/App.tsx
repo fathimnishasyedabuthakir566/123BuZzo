@@ -17,12 +17,19 @@ import UserProfile from "./pages/UserProfile";
 import DriverProfile from "./pages/DriverProfile";
 import AdminProfile from "./pages/AdminProfile";
 import About from "./pages/About";
+import Contact from "./pages/Contact";
 import NotFound from "./pages/NotFound";
-// ThemeProvider import removed
+import SavedRoutes from "./pages/SavedRoutes";
+import AlertsHub from "./pages/AlertsHub";
+import LiveRadar from "./pages/LiveRadar";
+import BusHeatmap from "./pages/BusHeatmap";
+import LiveChat from "./components/chat/LiveChat";
+import { useProximityAlerts } from "./hooks/useProximityAlerts";
 
 const queryClient = new QueryClient();
 
 const App = () => {
+  useProximityAlerts();
   return (
     // ThemeProvider removed
     <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID || "placeholder-client-id"}>
@@ -44,8 +51,14 @@ const App = () => {
               <Route path="/driver-profile" element={<DriverProfile />} />
               <Route path="/admin-profile" element={<AdminProfile />} />
               <Route path="/about" element={<About />} />
+              <Route path="/contact" element={<Contact />} />
+              <Route path="/saved-routes" element={<SavedRoutes />} />
+              <Route path="/alerts" element={<AlertsHub />} />
+              <Route path="/live-radar" element={<LiveRadar />} />
+              <Route path="/heatmap" element={<BusHeatmap />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
+            <LiveChat />
           </BrowserRouter>
         </TooltipProvider>
       </QueryClientProvider>

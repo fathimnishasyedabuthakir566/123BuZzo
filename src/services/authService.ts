@@ -50,18 +50,6 @@ interface BackendUser {
   createdAt?: string;
 }
 
-interface BackendUser {
-  _id: string;
-  name: string;
-  email: string;
-  role: UserRole;
-  phone?: string;
-  city?: string;
-  profilePhoto?: string;
-  assignedBus?: string;
-  createdAt?: string;
-}
-
 export const authService = {
   // ...
   // Login

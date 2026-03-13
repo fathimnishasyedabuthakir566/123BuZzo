@@ -93,6 +93,5 @@ userSchema.pre('save', async function (next) {
 
 // Add indexes for performance
 userSchema.index({ role: 1 });
-userSchema.index({ email: 1 });
 
 module.exports = mongoose.model('User', userSchema);

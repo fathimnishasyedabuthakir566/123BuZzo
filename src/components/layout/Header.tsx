@@ -4,6 +4,7 @@ import { Bus, Menu, X, MapPin, User as UserIcon, LogIn, LayoutDashboard, Globe }
 import { Button } from "@/components/ui/button";
 import { authService } from "@/services/authService";
 import { useTranslation } from "react-i18next";
+import NotificationBell from "@/components/notifications/NotificationBell";
 import type { User } from "@/types";
 
 const Header = () => {
@@ -103,6 +104,7 @@ const Header = () => {
 
             {user ? (
               <>
+                <NotificationBell />
                 <Link to={getDashboardPath()}>
                   <Button variant="outline" size="sm" className="hidden sm:flex gap-2 mr-2">
                     <LayoutDashboard className="w-4 h-4" />

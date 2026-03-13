@@ -116,17 +116,11 @@ const fetchWithTimeout = async (url: string, options: RequestInit = {}, timeout 
 
 export const busService = {
   // Get all buses
-  async getAllBuses(forceRefresh = false, page = 1, limit = 100): Promise<Bus[]> {
+  async getAllBuses(forceRefresh = false, page = 1, limit = 100, filters?: BusFilters): Promise<Bus[]> {
     const now = Date.now();
 
-    // Return cached data if available and not expired (simplified for pagination)
-    if (!forceRefresh && busCache && (now - busCache.timestamp < CACHE_DURATION) && page === 1) {
-      console.log('Returning cached bus data');
-      return busCache.data;
-    }
-
     // Try session storage as a secondary cache for faster page loads
-    if (!forceRefresh && page === 1) {
+    if (!forceRefresh && page === 1 && !filters) {
       const stored = sessionStorage.getItem('bus_data_cache');
       if (stored) {
         try {
@@ -142,15 +136,34 @@ export const busService = {
     }
 
     try {
-      console.log(`Fetching bus data (Page: ${page}, Limit: ${limit})...`);
+      console.log(`Fetching bus data with filters:`, filters);
       const startTime = performance.now();
 
-      const response = await fetchWithTimeout(`${API_URL}?page=${page}&limit=${limit}`, {}, 3000);
+      let queryStr = `page=${page}&limit=${limit}`;
+      if (filters?.route && filters.route !== 'all') {
+        queryStr += `&route=${encodeURIComponent(filters.route)}`;
+      }
+      if (filters?.status && filters.status !== 'all') {
+        queryStr += `&status=${filters.status}`;
+      }
+      if (filters?.platform && filters.platform !== 'all') {
+        queryStr += `&platform=${filters.platform}`;
+      }
+      if (filters?.searchQuery && filters.searchQuery.trim() !== '') {
+        queryStr += `&search=${encodeURIComponent(filters.searchQuery)}`;
+      }
 
-      if (!response.ok) throw new Error('Failed to fetch buses');
+      const timeoutValue = 10000; // Increased to 10s for slower DB connections
+      const response = await fetchWithTimeout(`${API_URL}?${queryStr}`, {}, timeoutValue);
+
+      if (!response.ok) {
+        console.error(`API returned error ${response.status}: ${response.statusText}`);
+        throw new Error('Failed to fetch buses');
+      }
+      
       const data = await response.json();
+      console.log(`Successfully fetched ${Array.isArray(data) ? data.length : (data?.buses?.length || 0)} buses from API`);
 
-      // Backend now returns { buses, total, page, pages }
       const busesList = Array.isArray(data) ? data : (data?.buses || []);
 
       const mappedData = (busesList as Bus[]).map((bus) => ({
@@ -158,26 +171,51 @@ export const busService = {
         id: bus._id ? String(bus._id) : (bus.id || "")
       }));
 
-      // Update cache ONLY for first page
-      if (page === 1) {
+      // Update cache ONLY for first page if no filters
+      if (page === 1 && (!filters || (filters.route === 'all' && filters.status === 'all' && filters.platform === 'all' && !filters.searchQuery))) {
         busCache = { data: mappedData, timestamp: now };
         sessionStorage.setItem('bus_data_cache', JSON.stringify(busCache));
       }
 
-      const endTime = performance.now();
-      console.log(`Fetch completed in ${(endTime - startTime).toFixed(2)}ms`);
-
-      if (mappedData.length === 0) throw new Error("No data from API, using mock");
-
       return mappedData;
     } catch (error) {
-      console.warn("API fetch failed or timed out, using fallback mock data:", error);
-      // Fallback to MOCK DATA
+      console.warn("API fetch failed or timed out:", error);
+      
+      // If we have cached data in sessionStorage, return it as emergency fallback
+      const stored = sessionStorage.getItem('bus_data_cache');
+      if (stored) {
+        try {
+          const { data } = JSON.parse(stored);
+          console.log('Returning stale session data as emergency fallback');
+          return data;
+        } catch (e) {}
+      }
+
+      // Final fallback to MOCK DATA if it's the first page
       if (page === 1) {
-        busCache = { data: MOCK_BUSES, timestamp: now };
+        console.log('Returning mock data as final fallback');
         return MOCK_BUSES;
       }
       return [];
+    }
+  },
+
+  // Get bus stats
+  async getBusStats(): Promise<{ total: number, active: number, onRoute: number, delayed: number, inactive: number }> {
+    try {
+      const response = await fetchWithTimeout(API_URL);
+      if (!response.ok) throw new Error('Failed to fetch stats');
+      const data = await response.json();
+      return data.stats || { total: 0, active: 0, onRoute: 0, delayed: 0, inactive: 0 };
+    } catch (error) {
+      // Mock stats from mock data
+      return {
+        total: MOCK_BUSES.length,
+        active: MOCK_BUSES.filter(b => b.status === 'active').length,
+        onRoute: MOCK_BUSES.filter(b => b.status === 'on-route').length,
+        delayed: MOCK_BUSES.filter(b => b.status === 'delayed').length,
+        inactive: MOCK_BUSES.filter(b => b.status === 'inactive').length
+      };
     }
   },
 
@@ -215,35 +253,9 @@ export const busService = {
     }
   },
 
-  // Filter buses
+  // Filter buses - Now uses server side filtering
   async filterBuses(filters: BusFilters): Promise<Bus[]> {
-    const buses = await this.getAllBuses();
-
-    // Client-side filtering
-    let filtered = [...buses];
-
-    if (filters.searchQuery) {
-      const query = filters.searchQuery.toLowerCase();
-      filtered = filtered.filter(
-        (bus) =>
-          bus.name.toLowerCase().includes(query) ||
-          bus.routeFrom.toLowerCase().includes(query) ||
-          bus.routeTo.toLowerCase().includes(query) ||
-          bus.busNumber.toLowerCase().includes(query)
-      );
-    }
-
-    if (filters.route && filters.route !== 'all') {
-      filtered = filtered.filter((bus) =>
-        `${bus.routeFrom} - ${bus.routeTo}` === filters.route
-      );
-    }
-
-    if (filters.status && filters.status !== 'all') {
-      filtered = filtered.filter((bus) => bus.status === filters.status);
-    }
-
-    return filtered;
+    return this.getAllBuses(true, 1, 1000, filters);
   },
 
   // Get available routes

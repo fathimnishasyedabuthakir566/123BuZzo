@@ -48,14 +48,23 @@ const busSchema = mongoose.Schema(
         ac: { type: Boolean, default: false },
         status: {
             type: String,
-            enum: ['Upcoming', 'Delayed', 'Arriving soon', 'Arrived', 'Not running', 'on-time'],
-            default: 'Not running',
+            enum: ['active', 'on-route', 'delayed', 'inactive', 'completed'],
+            default: 'inactive',
         },
+        estimatedArrivalTime: { type: String },
         location: {
             lat: { type: Number },
             lng: { type: Number },
             lastUpdated: { type: Date },
         },
+        crowdLevel: {
+            type: String,
+            enum: ['low', 'medium', 'high', 'full'],
+            default: 'low',
+        },
+        speed: { type: Number, default: 0 },
+        availableSeats: { type: Number },
+        driverRating: { type: Number, default: 4.5 },
         isActive: {
             type: Boolean,
             default: false,
@@ -67,7 +76,6 @@ const busSchema = mongoose.Schema(
 );
 
 // Add indexes for performance
-busSchema.index({ busNumber: 1 });
 busSchema.index({ routeFrom: 1, routeTo: 1 });
 busSchema.index({ status: 1 });
 busSchema.index({ platformNumber: 1 });

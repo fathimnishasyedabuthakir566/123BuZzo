@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { Layout } from "@/components/layout";
-import { Bus, Search, RefreshCw, User as UserIcon, Plus, Clock, Navigation } from "lucide-react";
+import { Bus, Search, RefreshCw, User as UserIcon, Plus, Clock, Navigation, Radar, Route, Flame } from "lucide-react";
 import { busService } from "@/services/busService";
 import { authService } from "@/services/authService";
 import type { Bus as BusType, User } from "@/types";
@@ -12,6 +12,7 @@ import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { useTranslation } from "react-i18next";
 import { useNavigate as routerNavigate } from "react-router-dom";
+import { socketService } from "@/services/socketService";
 
 const StatusLegend = ({ t }: { t: (key: string) => string }) => (
     <div className="flex flex-wrap items-center gap-4 px-6 py-3 bg-white/50 backdrop-blur-sm rounded-2xl border border-slate-100 mb-8 shadow-sm">
@@ -100,6 +101,17 @@ const PassengerDashboard = () => {
         return () => clearInterval(timer);
     }, []);
 
+    const [systemStats, setSystemStats] = useState({ total: 0, active: 0, onRoute: 0, delayed: 0, inactive: 0 });
+
+    const [debouncedSearch, setDebouncedSearch] = useState("");
+
+    useEffect(() => {
+        const handler = setTimeout(() => {
+            setDebouncedSearch(searchQuery);
+        }, 300);
+        return () => clearTimeout(handler);
+    }, [searchQuery]);
+
     const fetchDashboardData = useCallback(async (pageNum = 1, append = false) => {
         if (!append) setIsLoading(true);
 
@@ -114,17 +126,22 @@ const PassengerDashboard = () => {
                 setUser(currentUser);
             }
 
+            const filters = {
+                route: selectedRoute,
+                status: selectedStatus,
+                searchQuery: debouncedSearch,
+                platform: selectedPlatform
+            };
+
             // Fetch data in background/parallel
-            const [newBuses, availableRoutes] = await Promise.all([
-                busService.getAllBuses(!append, pageNum, 50),
-                busService.getRoutes()
+            const [newBuses, availableRoutes, stats] = await Promise.all([
+                busService.getAllBuses(!append, pageNum, 50, filters),
+                busService.getRoutes(),
+                busService.getBusStats()
             ]);
 
-            if (Array.isArray(availableRoutes)) {
-                setRoutes(availableRoutes);
-            } else {
-                setRoutes([]);
-            }
+            if (Array.isArray(availableRoutes)) setRoutes(availableRoutes);
+            setSystemStats(stats);
 
             if (append) {
                 setBuses(prev => [...prev, ...newBuses]);
@@ -138,11 +155,47 @@ const PassengerDashboard = () => {
             console.error("Dashboard load failed:", error);
             setIsLoading(false);
         }
-    }, [user, navigate]);
+    }, [user, navigate, selectedRoute, selectedStatus, debouncedSearch, selectedPlatform]);
 
     useEffect(() => {
         fetchDashboardData(1, false);
     }, [fetchDashboardData]);
+
+    // Real-time updates handler
+    useEffect(() => {
+        socketService.connect();
+        
+        socketService.on('receive-location', (data: any) => {
+            setBuses(prev => prev.map(bus => {
+                if (bus.id === data.busId || bus._id === data.busId || bus.id === data.routeId) {
+                    return {
+                        ...bus,
+                        speed: data.speed ?? bus.speed,
+                        status: data.status ?? bus.status,
+                        crowdLevel: data.crowdLevel ?? bus.crowdLevel,
+                        currentStop: data.currentStop ?? bus.currentStop,
+                        nextStop: data.nextStop ?? bus.nextStop,
+                        location: {
+                            lat: data.lat,
+                            lng: data.lng,
+                            lastUpdated: data.lastUpdated
+                        }
+                    };
+                }
+                return bus;
+            }));
+        });
+
+        socketService.on('system-notification', () => {
+             // Refresh stats when system events happen
+             busService.getBusStats().then(setSystemStats);
+        });
+
+        return () => {
+            socketService.off('receive-location');
+            socketService.off('system-notification');
+        };
+    }, []);
 
     const handleLoadMore = () => {
         const nextPage = page + 1;
@@ -160,38 +213,13 @@ const PassengerDashboard = () => {
 
     const currentFormattedTime = formatTime(currentTime);
 
-    const filteredBuses = (Array.isArray(buses) ? buses : []).filter((bus) => {
-        if (!bus) return false;
-        
-        const name = bus.name || "";
-        const busNumber = bus.busNumber || "";
-        const routeFrom = bus.routeFrom || "";
-        const routeTo = bus.routeTo || "";
-        const query = (searchQuery || "").toLowerCase();
-
-        const matchesSearch =
-            name.toLowerCase().includes(query) ||
-            busNumber.toLowerCase().includes(query) ||
-            routeFrom.toLowerCase().includes(query) ||
-            routeTo.toLowerCase().includes(query);
-
-        const matchesPlatform = selectedPlatform === 'all' || bus.platformNumber === selectedPlatform;
-        const matchesRoute = selectedRoute === 'all' || `${routeFrom} - ${routeTo}` === selectedRoute;
-        const matchesStatus = (selectedStatus === 'all' || bus.status === selectedStatus) && (bus.status !== 'completed'); // Default hide completed in dashboard
-
-        return matchesSearch && matchesPlatform && matchesRoute && matchesStatus;
-    });
+    const filteredBuses = useMemo(() => {
+        return Array.isArray(buses) ? buses : [];
+    }, [buses]);
 
     const metrics = useMemo(() => {
-        const safeBuses = Array.isArray(buses) ? buses : [];
-        return {
-            total: safeBuses.length,
-            active: safeBuses.filter(b => b?.status === 'active' || b?.isActive).length,
-            onRoute: safeBuses.filter(b => b?.status === 'on-route').length,
-            delayed: safeBuses.filter(b => b?.status === 'delayed').length,
-            inactive: safeBuses.filter(b => b?.status === 'inactive').length
-        };
-    }, [buses]);
+        return systemStats;
+    }, [systemStats]);
 
     const busesByPlatform = useMemo(() => {
         const groups: Record<number, BusType[]> = {};
@@ -261,30 +289,30 @@ const PassengerDashboard = () => {
                     <QuickActionCard
                         title={t("live_radar")}
                         desc="View all buses in your vicinity on a live interactive map."
-                        icon={Navigation}
+                        icon={Radar}
                         color="bg-primary/10 text-primary"
-                        onClick={() => navigate('/buses')}
+                        onClick={() => navigate('/live-radar')}
                     />
                     <QuickActionCard
                         title={t("saved_routes")}
                         desc="Quick access to your most frequented daily commute paths."
-                        icon={Plus}
+                        icon={Route}
                         color="bg-emerald-50 text-emerald-600"
-                        onClick={() => {}}
+                        onClick={() => navigate('/saved-routes')}
                     />
                     <QuickActionCard
                         title={t("alerts_hub")}
                         desc="Manage your proximity notifications and system updates."
                         icon={Clock}
                         color="bg-amber-50 text-amber-600"
-                        onClick={() => {}}
+                        onClick={() => navigate('/alerts')}
                     />
                     <QuickActionCard
-                        title={t("terminal_support")}
-                        desc="Live assistance for ticketing and platform inquiries."
-                        icon={UserIcon}
-                        color="bg-slate-50 text-slate-600"
-                        onClick={() => {}}
+                        title="Live Heatmap"
+                        desc="Real-time density analysis and operational hotspots."
+                        icon={Flame}
+                        color="bg-orange-50 text-orange-600"
+                        onClick={() => navigate('/heatmap')}
                     />
                 </div>
                 {/* Modern Terminal Header */}
@@ -304,7 +332,7 @@ const PassengerDashboard = () => {
                             <div className="flex items-center gap-6">
                                 <p className="text-slate-500 text-sm font-black flex items-center gap-2 uppercase tracking-widest">
                                     <Clock className="w-4 h-4 text-emerald-500 animate-pulse" />
-                                    {t("station_time")}: <span className="text-slate-900 ml-1">{format(currentTime, 'hh:mm AA')}</span>
+                                    {t("station_time")}: <span className="text-slate-900 ml-1">{format(currentTime, 'hh:mm a')}</span>
                                 </p>
                                 <div className="h-4 w-px bg-slate-200" />
                                 <p className="text-slate-500 text-sm font-black uppercase tracking-widest">

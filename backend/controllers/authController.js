@@ -3,7 +3,7 @@ const User = require('../models/userModel');
 const jwt = require('jsonwebtoken');
 const { OAuth2Client } = require('google-auth-library');
 
-const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+// Google Client initialization inside handler to ensure env vars are fresh
 
 const generateToken = (id) => {
     return jwt.sign({ id }, process.env.JWT_SECRET, {
@@ -112,6 +112,7 @@ const loginUser = asyncHandler(async (req, res) => {
 // @access  Public
 const googleLogin = asyncHandler(async (req, res) => {
     const { token, role } = req.body;
+    const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
     if (!token) {
         res.status(400);
@@ -178,9 +179,10 @@ const googleLogin = asyncHandler(async (req, res) => {
         });
 
     } catch (error) {
-        console.error('Google token verification failed:', error);
+        console.error('Google token verification failed detail:', error.message);
+        console.error('Expected Client ID:', process.env.GOOGLE_CLIENT_ID);
         res.status(401);
-        throw new Error('Google authentication failed - invalid token');
+        throw new Error(`Google authentication failed: ${error.message}`);
     }
 });
 

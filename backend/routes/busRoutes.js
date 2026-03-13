@@ -8,9 +8,12 @@ const {
     deleteBus,
     getRoutes,
     getShortestPath,
-    addIntermediateStop
+    addIntermediateStop,
+    updateOperationalData
 } = require('../controllers/busController');
 const { protect, admin } = require('../middleware/authMiddleware');
+
+router.patch('/:id/operational', protect, updateOperationalData);
 
 router.route('/')
     .get(getBuses)
