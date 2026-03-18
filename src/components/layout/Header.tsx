@@ -52,6 +52,7 @@ const Header = () => {
 
   const getProfilePath = () => {
     if (!user) return "/auth";
+    if (user.role === 'admin') return "/admin-profile";
     if (user.role === 'driver') return "/driver-profile";
     return "/profile";
   };

@@ -222,14 +222,15 @@ const UserProfile = () => {
                                 </div>
                             </div>
 
-                            {/* Member Since Item */}
                             <div className="flex items-center gap-4 group">
                                 <div className="p-3 bg-gray-50 dark:bg-gray-900 rounded-2xl text-gray-400 group-hover:text-primary transition-colors">
                                     <Calendar className="w-5 h-5" />
                                 </div>
                                 <div className="flex-1 pb-2">
                                     <p className="text-xs text-muted-foreground font-medium mb-0.5">Member Since</p>
-                                    <p className="font-semibold text-gray-900 dark:text-gray-100">{new Date(user.createdAt).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' })}</p>
+                                    <p className="font-semibold text-gray-900 dark:text-gray-100">
+                                        {user.createdAt ? new Date(user.createdAt).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' }) : 'Recently'}
+                                    </p>
                                 </div>
                             </div>
                         </div>

@@ -244,7 +244,7 @@ const DriverProfile = () => {
                                             <div>
                                                 <h4 className="font-bold text-slate-800">{trip.routeName}</h4>
                                                 <p className="text-xs text-slate-500 font-bold uppercase tracking-wider mt-1 flex items-center gap-2">
-                                                    <span>{format(new Date(trip.startTime), 'MMM d, yyyy - hh:mm a')}</span>
+                                                    <span>{trip.startTime ? format(new Date(trip.startTime), 'MMM d, yyyy - hh:mm a') : 'Recent'}</span>
                                                     {trip.status === 'completed' && <span className="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700">Completed</span>}
                                                     {trip.status === 'active' && <span className="px-2 py-0.5 rounded-full bg-blue-100 text-blue-700">Active</span>}
                                                 </p>
