@@ -190,7 +190,7 @@ const googleLogin = asyncHandler(async (req, res) => {
 // @route   GET /api/users/activity
 // @access  Private (Admin)
 const getUserActivity = asyncHandler(async (req, res) => {
-    const users = await User.find({}, 'name email role phone lastActive loginHistory isBlocked').sort('-lastActive');
+    const users = await User.find({}, 'name email role phone lastActive loginHistory isBlocked createdAt').sort('-createdAt');
     res.json(users);
 });
 
@@ -305,6 +305,21 @@ const getMe = asyncHandler(async (req, res) => {
     res.status(200).json({ message: 'User data display' });
 });
 
+// @desc    Delete user
+// @route   DELETE /api/users/:id
+// @access  Private (Admin)
+const deleteUser = asyncHandler(async (req, res) => {
+    const user = await User.findById(req.params.id);
+
+    if (user) {
+        await User.deleteOne({ _id: user._id });
+        res.json({ message: 'User removed' });
+    } else {
+        res.status(404);
+        throw new Error('User not found');
+    }
+});
+
 module.exports = {
     registerUser,
     loginUser,
@@ -315,4 +330,5 @@ module.exports = {
     getUserActivity,
     blockUser,
     unblockUser,
+    deleteUser,
 };

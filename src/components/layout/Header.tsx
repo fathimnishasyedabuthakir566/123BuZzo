@@ -39,6 +39,10 @@ const Header = () => {
     { href: "/about", label: t("about") },
   ];
 
+  if (user?.role === "admin") {
+    navLinks.push({ href: "/admin/users", label: "View Details" });
+  }
+
   const getDashboardPath = () => {
     if (!user) return "/auth";
     if (user.role === 'admin') return "/admin";

@@ -152,8 +152,8 @@ const AdminDashboard = () => {
     }
   };
 
-  const handleCreateBus = async (data: Omit<Bus, 'id' | 'location'> & Partial<Bus>) => {
-    const success = await busService.createBus(data);
+  const handleCreateBus = async (data: any) => {
+    const success = await busService.createBus(data as any);
     if (success) {
       toast.success("Bus created successfully");
       setShowAddBus(false);
@@ -244,6 +244,19 @@ const AdminDashboard = () => {
           <div className="p-6">
             {activeTab === 'dashboard' && (
               <>
+                <div className="bg-gradient-to-r from-primary/10 to-accent/10 rounded-2xl p-8 mb-8 flex flex-col items-center justify-center text-center shadow-sm border border-border/50 relative overflow-hidden">
+                  <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl -mr-32 -mt-32 pointer-events-none" />
+                  <div className="absolute bottom-0 left-0 w-48 h-48 bg-accent/5 rounded-full blur-2xl -ml-24 -mb-24 pointer-events-none" />
+                  <h2 className="text-3xl font-black tracking-tight text-foreground relative z-10 mb-2">Welcome Back, {user.name}!</h2>
+                  <p className="text-muted-foreground font-medium mb-6 relative z-10 max-w-md">Access your control center to monitor buses, analyze trips, and manage the system's users.</p>
+                  
+                  <Link to="/admin/users" className="relative z-10">
+                    <Button size="lg" className="h-12 px-8 font-black text-white bg-gradient-to-r from-primary to-accent hover:opacity-90 transition-opacity shadow-lg shadow-primary/20 hover:scale-105 transform duration-300">
+                      View User Activity
+                    </Button>
+                  </Link>
+                </div>
+
                 <AdminStats buses={buses} />
                 <div className="mt-6">
                   <QuickUpdatePanel buses={buses} onUpdate={handleQuickUpdate} />
@@ -333,6 +346,9 @@ const UserActivityTable = () => {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [roleFilter, setRoleFilter] = useState<string>("all");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [selectedUser, setSelectedUser] = useState<UserActivity | null>(null);
+  const itemsPerPage = 10;
 
   const fetchActivity = async () => {
     setLoading(true);
@@ -367,6 +383,45 @@ const UserActivityTable = () => {
     }
   };
 
+  const handleDeleteUser = async (userId: string) => {
+    if (window.confirm("WARNING: This will permanently delete the user. Are you sure?")) {
+      const res = await authService.deleteUser(userId);
+      if (res.success) {
+        toast.success(res.message);
+        setSelectedUser(null);
+        fetchActivity();
+      } else {
+        toast.error(res.message);
+      }
+    }
+  };
+
+  const downloadCSV = () => {
+    const headers = ["Name", "Email", "Role", "Phone", "Registration Date", "Last Active", "Status"];
+    const csvContent = [
+      headers.join(","),
+      ...users.map(u => [
+        u.name,
+        u.email,
+        u.role,
+        u.phone || 'N/A',
+        u.createdAt ? new Date(u.createdAt).toLocaleDateString() : 'N/A',
+        u.lastActive ? new Date(u.lastActive).toLocaleString() : 'N/A',
+        u.isBlocked ? 'Blocked' : 'Active'
+      ].join(","))
+    ].join("\n");
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement("a");
+    const url = URL.createObjectURL(blob);
+    link.setAttribute("href", url);
+    link.setAttribute("download", `users_export_${new Date().toISOString().split('T')[0]}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   const filteredUsers = users.filter(user => {
     const matchesSearch = user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       user.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -375,103 +430,190 @@ const UserActivityTable = () => {
     return matchesSearch && matchesRole;
   });
 
-  if (loading && users.length === 0) return <div>Loading activity...</div>;
+  const totalPages = Math.ceil(filteredUsers.length / itemsPerPage);
+  const currentUsers = filteredUsers.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+
+  const stats = {
+    total: users.length,
+    activeToday: users.filter(u => u.lastActive && new Date(u.lastActive).toDateString() === new Date().toDateString()).length,
+    newToday: users.filter(u => u.createdAt && new Date(u.createdAt).toDateString() === new Date().toDateString()).length,
+  };
+
+  if (loading && users.length === 0) return <div>Loading user activity...</div>;
 
   return (
-    <div className="glass-card rounded-xl overflow-hidden">
-      <div className="p-4 border-b border-border flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <h2 className="text-lg font-semibold">User Management</h2>
-          <p className="text-sm text-muted-foreground">Monitor and manage access for all users</p>
+    <div className="space-y-6">
+      {/* Stats Overview */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="glass-card rounded-xl p-4">
+          <p className="text-sm text-muted-foreground">Total Registered Users</p>
+          <p className="text-2xl font-bold">{stats.total}</p>
         </div>
+        <div className="glass-card rounded-xl p-4">
+          <p className="text-sm text-muted-foreground">Active Users Today</p>
+          <p className="text-2xl font-bold text-success">{stats.activeToday}</p>
+        </div>
+        <div className="glass-card rounded-xl p-4">
+          <p className="text-sm text-muted-foreground">New Registrations Today</p>
+          <p className="text-2xl font-bold text-info">{stats.newToday}</p>
+        </div>
+      </div>
 
-        <div className="flex flex-wrap gap-2">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-            <input
-              type="text"
-              placeholder="Search users..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="input-field pl-10 py-1.5 text-sm w-48"
-            />
+      <div className="glass-card rounded-xl overflow-hidden">
+        <div className="p-4 border-b border-border flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <h2 className="text-lg font-semibold">User Management</h2>
+            <p className="text-sm text-muted-foreground">Monitor and manage all system users</p>
           </div>
 
-          <select
-            className="input-field py-1.5 text-sm w-32"
-            value={roleFilter}
-            onChange={(e) => setRoleFilter(e.target.value)}
-          >
-            <option value="all">All Roles</option>
-            <option value="admin">Admin</option>
-            <option value="driver">Driver</option>
-            <option value="user">Passenger</option>
-          </select>
+          <div className="flex flex-wrap items-center gap-2">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <input
+                type="text"
+                placeholder="Search..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="input-field pl-10 py-1.5 text-sm w-48"
+              />
+            </div>
+
+            <select
+              className="input-field py-1.5 text-sm w-32"
+              value={roleFilter}
+              onChange={(e) => { setRoleFilter(e.target.value); setCurrentPage(1); }}
+            >
+              <option value="all">All Roles</option>
+              <option value="admin">Admin</option>
+              <option value="driver">Driver</option>
+              <option value="user">Passenger</option>
+            </select>
+
+            <Button variant="outline" size="sm" onClick={downloadCSV}>Export CSV</Button>
+          </div>
         </div>
-      </div>
-      <div className="overflow-x-auto">
-        <table className="w-full">
-          <thead className="bg-secondary/50">
-            <tr>
-              <th className="p-4 text-left font-medium text-sm text-muted-foreground uppercase">User</th>
-              <th className="p-4 text-left font-medium text-sm text-muted-foreground uppercase">Role</th>
-              <th className="p-4 text-left font-medium text-sm text-muted-foreground uppercase">Phone</th>
-              <th className="p-4 text-left font-medium text-sm text-muted-foreground uppercase">Last Active</th>
-              <th className="p-4 text-left font-medium text-sm text-muted-foreground uppercase whitespace-nowrap">Actions</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-border">
-            {filteredUsers.map((user, idx) => (
-              <tr key={idx} className="hover:bg-muted/50 transition-colors">
-                <td className="p-4 flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold">
-                    {user.name.charAt(0)}
-                  </div>
-                  <div>
-                    <p className="font-medium">{user.name}</p>
-                    <p className="text-xs text-muted-foreground">{user.email}</p>
-                  </div>
-                </td>
-                <td className="p-4">
-                  <span className={`px - 2 py - 1 rounded - full text - xs font - bold uppercase ${user.role === 'admin' ? 'bg-destructive/10 text-destructive' :
-                    user.role === 'driver' ? 'bg-accent/10 text-accent' :
-                      'bg-secondary text-muted-foreground'
-                    } `}>
-                    {user.role}
-                  </span>
-                </td>
-                <td className="p-4 text-sm font-mono">
-                  {user.phone || '-'}
-                </td>
-                <td className="p-4 text-sm">
-                  {user.lastActive ? new Date(user.lastActive).toLocaleString() : 'Never'}
-                </td>
-                <td className="p-4 text-sm">
-                  {user.isBlocked ? (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="text-success border-success/30 hover:bg-success/10 h-8"
-                      onClick={() => handleUnblockUser(user._id)}
-                    >
-                      Unblock
-                    </Button>
-                  ) : (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="text-destructive border-destructive/30 hover:bg-destructive/10 h-8"
-                      onClick={() => handleBlockUser(user._id)}
-                    >
-                      Block
-                    </Button>
-                  )}
-                </td>
+
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead className="bg-secondary/50">
+              <tr>
+                <th className="p-4 text-left font-medium text-sm text-muted-foreground uppercase">User</th>
+                <th className="p-4 text-left font-medium text-sm text-muted-foreground uppercase">Role</th>
+                <th className="p-4 text-left font-medium text-sm text-muted-foreground uppercase">Reg Date</th>
+                <th className="p-4 text-left font-medium text-sm text-muted-foreground uppercase">Last Login</th>
+                <th className="p-4 text-left font-medium text-sm text-muted-foreground uppercase">Status</th>
+                <th className="p-4 text-left font-medium text-sm text-muted-foreground uppercase whitespace-nowrap">Actions</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody className="divide-y divide-border">
+              {currentUsers.map((user, idx) => (
+                <tr key={idx} className="hover:bg-muted/50 transition-colors cursor-pointer" onClick={() => setSelectedUser(user)}>
+                  <td className="p-4 flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold">
+                      {user.name.charAt(0).toUpperCase()}
+                    </div>
+                    <div>
+                      <p className="font-medium text-sm">{user.name}</p>
+                      <p className="text-xs text-muted-foreground">{user.email}</p>
+                    </div>
+                  </td>
+                  <td className="p-4">
+                    <span className={`px-2 py-1 rounded-full text-xs font-bold uppercase ${user.role.toLowerCase() === 'admin' ? 'bg-destructive/10 text-destructive' :
+                      user.role.toLowerCase() === 'driver' ? 'bg-accent/10 text-accent' :
+                        'bg-secondary text-muted-foreground'
+                      }`}>
+                      {user.role}
+                    </span>
+                  </td>
+                  <td className="p-4 text-sm whitespace-nowrap">
+                    {user.createdAt ? new Date(user.createdAt).toLocaleDateString() : 'N/A'}
+                  </td>
+                  <td className="p-4 text-sm">
+                    {user.lastActive ? new Date(user.lastActive).toLocaleString() : 'Never'}
+                  </td>
+                  <td className="p-4 text-sm">
+                    {user.isBlocked ? (
+                      <span className="text-destructive font-medium">Blocked</span>
+                    ) : (
+                      <span className="text-success font-medium">Active</span>
+                    )}
+                  </td>
+                  <td className="p-4 text-sm" onClick={e => e.stopPropagation()}>
+                    <div className="flex gap-2">
+                       {user.isBlocked ? (
+                          <Button variant="outline" size="sm" className="text-success border-success/30 hover:bg-success/10 h-8" onClick={() => handleUnblockUser(user._id)}>Unblock</Button>
+                        ) : (
+                          <Button variant="outline" size="sm" className="text-warning border-warning/30 hover:bg-warning/10 h-8" onClick={() => handleBlockUser(user._id)}>Block</Button>
+                        )}
+                        <Button variant="destructive" size="sm" className="h-8" onClick={() => handleDeleteUser(user._id)}>Delete</Button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          {currentUsers.length === 0 && <div className="p-8 text-center text-muted-foreground">No users found.</div>}
+        </div>
+
+        {totalPages > 1 && (
+          <div className="p-4 border-t border-border flex justify-between items-center bg-secondary/20">
+            <span className="text-sm text-muted-foreground">Showing page {currentPage} of {totalPages}</span>
+            <div className="flex gap-2">
+              <Button variant="outline" size="sm" disabled={currentPage === 1} onClick={() => setCurrentPage(p => p - 1)}>Prev</Button>
+              <Button variant="outline" size="sm" disabled={currentPage === totalPages} onClick={() => setCurrentPage(p => p + 1)}>Next</Button>
+            </div>
+          </div>
+        )}
       </div>
+
+      {/* User Details Modal */}
+      {selectedUser && (
+        <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={() => setSelectedUser(null)}>
+          <div className="bg-card w-full max-w-2xl rounded-2xl shadow-xl overflow-hidden border border-border" onClick={e => e.stopPropagation()}>
+            <div className="p-6 border-b border-border flex justify-between items-center">
+              <h3 className="text-xl font-bold">User Details</h3>
+              <Button variant="ghost" size="sm" onClick={() => setSelectedUser(null)}>✕</Button>
+            </div>
+            <div className="p-6 space-y-6 bg-muted/20">
+              <div className="flex items-start gap-4">
+                <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-2xl">
+                  {selectedUser.name.charAt(0).toUpperCase()}
+                </div>
+                <div>
+                  <h4 className="text-lg font-bold">{selectedUser.name}</h4>
+                  <p className="text-muted-foreground">{selectedUser.email}</p>
+                  <div className="mt-2 flex gap-2">
+                    <span className="px-2 py-1 bg-secondary rounded text-xs font-mono">{selectedUser.role}</span>
+                    <span className="px-2 py-1 bg-secondary rounded text-xs font-mono">{selectedUser.phone || 'No phone'}</span>
+                  </div>
+                </div>
+              </div>
+              
+              <div>
+                <h4 className="font-semibold mb-3 border-b border-border pb-2">Recent Login Activity</h4>
+                <div className="max-h-64 overflow-y-auto space-y-2 pr-2">
+                  {selectedUser.loginHistory && selectedUser.loginHistory.length > 0 ? (
+                    selectedUser.loginHistory.slice().reverse().map((hist, i) => (
+                      <div key={i} className="flex justify-between items-center p-3 glass-card rounded-lg text-sm">
+                        <div>
+                          <p className="font-medium">{new Date(hist.timestamp).toLocaleString()}</p>
+                          <p className="text-xs text-muted-foreground">Device: {hist.device || 'Unknown'}</p>
+                        </div>
+                        <span className="text-xs font-mono bg-secondary/50 px-2 py-1 rounded">{hist.ip || 'Unknown IP'}</span>
+                      </div>
+                    ))
+                  ) : (
+                    <p className="text-sm text-muted-foreground">No login history recorded.</p>
+                  )}
+                </div>
+              </div>
+            </div>
+            <div className="p-4 border-t border-border bg-card flex justify-end">
+              <Button onClick={() => setSelectedUser(null)}>Close</Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

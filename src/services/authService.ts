@@ -36,6 +36,7 @@ export interface UserActivity {
   lastLogin?: string;
   isBlocked?: boolean;
   loginHistory?: Array<{ ip: string; device: string; timestamp: string }>;
+  createdAt?: string;
 }
 
 interface BackendUser {
@@ -66,7 +67,7 @@ export const authService = {
       const data = await response.json() as BackendUser;
 
       if (!response.ok) {
-        return { success: false, error: (data as any).message || 'Login failed' };
+        return { success: false, error: (data as { message?: string }).message || 'Login failed' };
       }
 
       // Map backend user to frontend user
@@ -107,7 +108,7 @@ export const authService = {
       const data = await response.json() as BackendUser;
 
       if (!response.ok) {
-        return { success: false, error: (data as any).message || 'Google login failed' };
+        return { success: false, error: (data as { message?: string }).message || 'Google login failed' };
       }
 
       // Map backend user to frontend user
@@ -297,6 +298,19 @@ export const authService = {
       });
       const data = await response.json();
       return { success: response.ok, message: data.message || (response.ok ? 'User unblocked' : 'Failed to unblock user') };
+    } catch (error) {
+      return { success: false, message: 'Network error' };
+    }
+  },
+
+  // Delete User
+  async deleteUser(userId: string): Promise<{ success: boolean; message: string }> {
+    try {
+      const response = await fetch(`/api/users/${userId}`, {
+        method: 'DELETE',
+      });
+      const data = await response.json();
+      return { success: response.ok, message: data.message || (response.ok ? 'User deleted' : 'Failed to delete user') };
     } catch (error) {
       return { success: false, message: 'Network error' };
     }

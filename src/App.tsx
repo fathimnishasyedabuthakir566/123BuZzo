@@ -11,6 +11,7 @@ import BusDetails from "./pages/BusDetails";
 import BusDirectory from "./pages/BusDirectory";
 import Auth from "./pages/Auth";
 import AdminDashboard from "./pages/AdminDashboard";
+import AdminUsers from "./pages/AdminUsers";
 import DriverDashboard from "./pages/DriverDashboard";
 import PassengerDashboard from "./pages/PassengerDashboard";
 import UserProfile from "./pages/UserProfile";
@@ -45,6 +46,7 @@ const App = () => {
               <Route path="/bus/:id" element={<BusDetails />} />
               <Route path="/auth" element={<Auth />} />
               <Route path="/admin" element={<AdminDashboard />} />
+              <Route path="/admin/users" element={<AdminUsers />} />
               <Route path="/dashboard" element={<PassengerDashboard />} />
               <Route path="/profile" element={<UserProfile />} />
               <Route path="/driver" element={<DriverDashboard />} />
