@@ -53,7 +53,6 @@ const App = () => {
               <Route path="/live-terminal" element={<LiveTerminal />} />
               
               {/* Passenger Protected Routes */}
-              <Route path="/dashboard" element={<ProtectedRoute allowedRoles={['user']}><PassengerDashboard /></ProtectedRoute>} />
               <Route path="/profile" element={<ProtectedRoute allowedRoles={['user']}><UserProfile /></ProtectedRoute>} />
               <Route path="/saved-routes" element={<ProtectedRoute allowedRoles={['user']}><SavedRoutes /></ProtectedRoute>} />
               

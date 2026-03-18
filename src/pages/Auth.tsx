@@ -43,7 +43,7 @@ const Auth = () => {
     const lowerRole = (userRole || 'user').toLowerCase();
     if (lowerRole === 'admin') navigate('/admin');
     else if (lowerRole === 'driver') navigate('/driver');
-    else navigate('/dashboard');
+    else navigate('/');
   };
 
   const handleSubmit = async (data: Record<string, string>) => {

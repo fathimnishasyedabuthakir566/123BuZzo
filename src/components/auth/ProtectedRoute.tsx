@@ -42,7 +42,7 @@ export const ProtectedRoute = ({ children, allowedRoles }: ProtectedRouteProps) 
     const roleMap: Record<string, string> = {
       admin: "/admin",
       driver: "/driver",
-      user: "/dashboard"
+      user: "/"
     };
     return <Navigate to={roleMap[user.role.toLowerCase()] || "/"} replace />;
   }
