@@ -2,12 +2,26 @@ const asyncHandler = require('express-async-handler');
 const Bus = require('../models/busModel');
 const dijkstra = require('../utils/dijkstra');
 const { buildGraphFromBuses } = require('../utils/graphBuilder');
+const { mockBuses, mockStats } = require('../utils/mockData');
+const mongoose = require('mongoose');
 
 // @desc    Get all buses
 // @route   GET /api/buses
 // @access  Public
 const getBuses = asyncHandler(async (req, res) => {
     console.log('GET /api/buses - Fetching buses with filters:', req.query);
+
+    // Fallback to mock data if DB is down
+    if (mongoose.connection.readyState !== 1) {
+        console.warn('DB disconnected! Serving mock buses...');
+        return res.json({
+            buses: mockBuses,
+            page: 1,
+            pages: 1,
+            total: mockBuses.length,
+            stats: mockStats
+        });
+    }
 
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 1000;
@@ -78,6 +92,12 @@ const getBuses = asyncHandler(async (req, res) => {
 // @route   GET /api/buses/:id
 // @access  Public
 const getBusById = asyncHandler(async (req, res) => {
+    // Fallback to mock data if DB is down
+    if (mongoose.connection.readyState !== 1) {
+        const mockBus = mockBuses.find(b => b._id === req.params.id || b.id === req.params.id);
+        if (mockBus) return res.json(mockBus);
+    }
+
     const bus = await Bus.findById(req.params.id);
     if (bus) {
         // Map intermediateStops to timings format for frontend

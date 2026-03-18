@@ -109,14 +109,12 @@ const Header = () => {
             {user ? (
               <>
                 <NotificationBell />
-                {user.role !== 'user' && (
-                  <Link to={getDashboardPath()}>
-                    <Button variant="outline" size="sm" className="hidden sm:flex gap-2 mr-2">
-                      <LayoutDashboard className="w-4 h-4" />
-                      Dashboard
-                    </Button>
-                  </Link>
-                )}
+                <Link to={getDashboardPath()}>
+                  <Button variant="outline" size="sm" className="hidden sm:flex gap-2 mr-2">
+                    <LayoutDashboard className="w-4 h-4" />
+                    Dashboard
+                  </Button>
+                </Link>
 
                 <Link to={getProfilePath()}>
                   <Button variant="accent" size="sm" className="rounded-full w-10 h-10 p-0 overflow-hidden border-2 border-primary/20">
@@ -183,14 +181,12 @@ const Header = () => {
                 {user ? (
                   <>
 
-                    {user.role !== 'user' && (
-                      <Link to={getDashboardPath()} className="flex-1" onClick={() => setIsMenuOpen(false)}>
-                        <Button variant="outline" size="sm" className="w-full gap-2 font-semibold">
-                          <LayoutDashboard className="w-4 h-4" />
-                          Dashboard
-                        </Button>
-                      </Link>
-                    )}
+                    <Link to={getDashboardPath()} className="flex-1" onClick={() => setIsMenuOpen(false)}>
+                      <Button variant="outline" size="sm" className="w-full gap-2 font-semibold">
+                        <LayoutDashboard className="w-4 h-4" />
+                        Dashboard
+                      </Button>
+                    </Link>
 
                     <Link to={getProfilePath()} className="flex-1" onClick={() => setIsMenuOpen(false)}>
                       <Button variant="accent" size="sm" className="w-full gap-2 font-semibold">

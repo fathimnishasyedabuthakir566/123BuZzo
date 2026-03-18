@@ -18,15 +18,6 @@ const Auth = () => {
   const [showRoleSelection, setShowRoleSelection] = useState(!searchParams.get("mode") && !searchParams.get("role"));
 
   useEffect(() => {
-    // Check if user is already logged in and redirect
-    const checkUser = async () => {
-      const user = await authService.getCurrentUser();
-      if (user) {
-        navigateByRole(user.role);
-      }
-    };
-    checkUser();
-
     const modeParam = searchParams.get("mode") as AuthMode;
     const roleParam = searchParams.get("role") as UserRole;
     if (modeParam) {
@@ -37,13 +28,13 @@ const Auth = () => {
       setRole(roleParam);
       setShowRoleSelection(false);
     }
-  }, [searchParams, navigate]);
+  }, [searchParams]);
 
   const navigateByRole = (userRole?: string) => {
     const lowerRole = (userRole || 'user').toLowerCase();
     if (lowerRole === 'admin') navigate('/admin');
     else if (lowerRole === 'driver') navigate('/driver');
-    else navigate('/');
+    else navigate('/dashboard');
   };
 
   const handleSubmit = async (data: Record<string, string>) => {

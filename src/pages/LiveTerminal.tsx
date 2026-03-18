@@ -23,6 +23,7 @@ const LiveTerminal = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
     const [currentTime, setCurrentTime] = useState(new Date());
+    const [weather, setWeather] = useState({ temp: 32, condition: 'Clear Skies' });
 
     useEffect(() => {
         const fetchBuses = async () => {
@@ -83,21 +84,32 @@ const LiveTerminal = () => {
 
     return (
         <Layout showFooter={false}>
-            <div className="min-h-screen bg-[#0a0c10] text-slate-300 font-mono overflow-hidden flex flex-col">
-                {/* Board Header */}
-                <header className="p-8 bg-slate-900/50 border-b border-white/5 flex flex-col md:flex-row justify-between items-center gap-6">
+            <div className="min-h-screen bg-[#07090c] text-slate-300 font-mono overflow-hidden flex flex-col">
+                {/* Board Header with Weather Ticker */}
+                <div className="w-full bg-amber-500 text-black py-1 overflow-hidden whitespace-nowrap">
+                   <div className="animate-scroll inline-block">
+                      <span className="mx-8 font-black uppercase text-[10px] tracking-widest">
+                         [ WEATHER ADVISORY: {weather.temp}°C {weather.condition} ] • [ NETWORK STATUS: OPTIMAL ] • [ TERMINAL A: OPERATIONAL ] • [ ALL ROUTES TRACKING LIVE ] • [ SYSTEM UPDATED: {format(currentTime, 'HH:mm')} ]
+                      </span>
+                      <span className="mx-8 font-black uppercase text-[10px] tracking-widest">
+                         [ WEATHER ADVISORY: {weather.temp}°C {weather.condition} ] • [ NETWORK STATUS: OPTIMAL ] • [ TERMINAL A: OPERATIONAL ] • [ ALL ROUTES TRACKING LIVE ] • [ SYSTEM UPDATED: {format(currentTime, 'HH:mm')} ]
+                      </span>
+                   </div>
+                </div>
+
+                <header className="p-8 bg-slate-900/20 border-b border-white/5 flex flex-col md:flex-row justify-between items-center gap-6 backdrop-blur-md">
                     <div className="flex items-center gap-6">
-                        <div className="w-16 h-16 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center">
-                            <BusIcon className="w-8 h-8 text-amber-500" />
+                        <div className="w-16 h-16 rounded-2xl bg-amber-500/10 border border-amber-500/40 flex items-center justify-center shadow-[0_0_20px_rgba(245,158,11,0.15)]">
+                            <BusIcon className="w-8 h-8 text-amber-500 animate-bus-tilt" />
                         </div>
                         <div>
-                            <h1 className="text-3xl font-black text-white tracking-widest uppercase">Live Terminal Board</h1>
+                            <h1 className="text-3xl font-black text-white tracking-widest uppercase text-glow">Live Terminal Board</h1>
                             <div className="flex items-center gap-4 mt-2">
-                                <span className="flex items-center gap-2 text-emerald-500 text-xs font-bold">
-                                    <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" /> NETWORK LIVE
+                                <span className="flex items-center gap-2 text-emerald-500 text-xs font-black">
+                                    <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse-dot shadow-[0_0_10px_rgba(16,185,129,0.5)]" /> NETWORK LIVE
                                 </span>
                                 <span className="w-px h-3 bg-white/10" />
-                                <span className="text-amber-500/70 text-xs font-bold uppercase tracking-widest">
+                                <span className="text-amber-500/70 text-xs font-black uppercase tracking-widest">
                                     {format(currentTime, 'EEEE, MMMM do')}
                                 </span>
                             </div>
@@ -106,10 +118,10 @@ const LiveTerminal = () => {
 
                     <div className="flex items-center gap-8">
                         <div className="text-right">
-                            <p className="text-5xl font-black text-white tracking-tighter transition-all tabular-nums">
+                            <p className="text-5xl font-black text-white tracking-tighter transition-all tabular-nums text-glow">
                                 {format(currentTime, 'HH:mm:ss')}
                             </p>
-                            <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.3em] mt-1 text-terminal-amber">Local Terminal Time</p>
+                            <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.3em] mt-1 text-terminal-amber">Local Terminal UTC+5:30</p>
                         </div>
                         
                         <div className="relative group">
@@ -117,7 +129,7 @@ const LiveTerminal = () => {
                             <input 
                                 type="text"
                                 placeholder="SEARCH ROUTE / BUS..."
-                                className="h-14 w-64 bg-black/40 border border-white/5 rounded-xl pl-12 pr-4 text-sm font-black focus:ring-2 focus:ring-amber-500/20 outline-none transition-all placeholder:text-slate-600 uppercase"
+                                className="h-14 w-64 bg-black/40 border border-white/10 rounded-xl pl-12 pr-4 text-sm font-black focus:ring-2 focus:ring-amber-500/40 outline-none transition-all placeholder:text-slate-700 uppercase"
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
                             />

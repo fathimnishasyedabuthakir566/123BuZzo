@@ -470,3 +470,31 @@
   transform: translateY(-2px);
   box-shadow: 0 10px 20px -5px rgba(13, 148, 136, 0.3);
 }
+/* Premium Utilities */
+.premium-glass {
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(12px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+}
+
+.text-glow {
+  text-shadow: 0 0 10px rgba(20, 184, 166, 0.5);
+}
+
+.card-hover-premium {
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.card-hover-premium:hover {
+  transform: translateY(-8px) scale(1.02);
+  border-color: hsl(var(--accent) / 0.4);
+  box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.2);
+}
+
+.gradient-border {
+  position: relative;
+  background: linear-gradient(var(--background), var(--background)) padding-box,
+              var(--gradient-hero) border-box;
+  border: 2px solid transparent;
+}

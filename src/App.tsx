@@ -27,13 +27,15 @@ import LiveTerminal from "./pages/LiveTerminal";
 import BusHeatmap from "./pages/BusHeatmap";
 import LiveChat from "./components/chat/LiveChat";
 import { useProximityAlerts } from "./hooks/useProximityAlerts";
-import { ProtectedRoute } from "./components/auth/ProtectedRoute";
+
+import ProtectedRoute from "./components/auth/ProtectedRoute";
 
 const queryClient = new QueryClient();
 
 const App = () => {
   useProximityAlerts();
   return (
+    // ThemeProvider removed
     <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID || "placeholder-client-id"}>
       <QueryClientProvider client={queryClient}>
         <TooltipProvider>
@@ -43,32 +45,32 @@ const App = () => {
             <Routes>
               {/* Public Routes */}
               <Route path="/" element={<Index />} />
-              <Route path="/buses" element={<BusList />} />
-              <Route path="/bus-directory" element={<BusDirectory />} />
-              <Route path="/bus/:id" element={<BusDetails />} />
               <Route path="/auth" element={<Auth />} />
               <Route path="/about" element={<About />} />
               <Route path="/contact" element={<Contact />} />
+              <Route path="/buses" element={<BusList />} />
+              <Route path="/bus-directory" element={<BusDirectory />} />
+              <Route path="/bus/:id" element={<BusDetails />} />
               <Route path="/live-radar" element={<LiveRadar />} />
               <Route path="/live-terminal" element={<LiveTerminal />} />
-              
+
               {/* Passenger Protected Routes */}
-              <Route path="/profile" element={<ProtectedRoute allowedRoles={['user']}><UserProfile /></ProtectedRoute>} />
-              <Route path="/saved-routes" element={<ProtectedRoute allowedRoles={['user']}><SavedRoutes /></ProtectedRoute>} />
-              
+              <Route path="/dashboard" element={<ProtectedRoute allowedRoles={["user"]}><PassengerDashboard /></ProtectedRoute>} />
+              <Route path="/profile" element={<ProtectedRoute allowedRoles={["user"]}><UserProfile /></ProtectedRoute>} />
+              <Route path="/saved-routes" element={<ProtectedRoute allowedRoles={["user"]}><SavedRoutes /></ProtectedRoute>} />
+              <Route path="/alerts" element={<ProtectedRoute allowedRoles={["user"]}><AlertsHub /></ProtectedRoute>} />
+
               {/* Driver Protected Routes */}
-              <Route path="/driver" element={<ProtectedRoute allowedRoles={['driver']}><DriverDashboard /></ProtectedRoute>} />
-              <Route path="/driver-profile" element={<ProtectedRoute allowedRoles={['driver']}><DriverProfile /></ProtectedRoute>} />
-              
+              <Route path="/driver" element={<ProtectedRoute allowedRoles={["driver"]}><DriverDashboard /></ProtectedRoute>} />
+              <Route path="/driver-profile" element={<ProtectedRoute allowedRoles={["driver"]}><DriverProfile /></ProtectedRoute>} />
+
               {/* Admin Protected Routes */}
-              <Route path="/admin" element={<ProtectedRoute allowedRoles={['admin']}><AdminDashboard /></ProtectedRoute>} />
-              <Route path="/admin/users" element={<ProtectedRoute allowedRoles={['admin']}><AdminUsers /></ProtectedRoute>} />
-              <Route path="/admin-profile" element={<ProtectedRoute allowedRoles={['admin']}><AdminProfile /></ProtectedRoute>} />
-              <Route path="/heatmap" element={<ProtectedRoute allowedRoles={['admin']}><BusHeatmap /></ProtectedRoute>} />
-              
-              {/* Shared Protected Routes */}
-              <Route path="/alerts" element={<ProtectedRoute><AlertsHub /></ProtectedRoute>} />
-              
+              <Route path="/admin" element={<ProtectedRoute allowedRoles={["admin"]}><AdminDashboard /></ProtectedRoute>} />
+              <Route path="/admin/users" element={<ProtectedRoute allowedRoles={["admin"]}><AdminUsers /></ProtectedRoute>} />
+              <Route path="/admin-profile" element={<ProtectedRoute allowedRoles={["admin"]}><AdminProfile /></ProtectedRoute>} />
+              <Route path="/heatmap" element={<ProtectedRoute allowedRoles={["admin"]}><BusHeatmap /></ProtectedRoute>} />
+
+              {/* 404 */}
               <Route path="*" element={<NotFound />} />
             </Routes>
             <LiveChat />

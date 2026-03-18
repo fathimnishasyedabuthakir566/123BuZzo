@@ -1,13 +1,12 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { Bus, MapPin, Clock, Shield, Users, ArrowRight, CheckCircle2 } from "lucide-react";
+import { Bus, MapPin, Clock, Shield, Users, ArrowRight, CheckCircle2, Wifi } from "lucide-react";
 import { Layout } from "@/components/layout";
 import { Button } from "@/components/ui/button";
 import { BusCard } from "@/components/bus";
 import { busService } from "@/services/busService";
 import { useTranslation } from "react-i18next";
 import type { Bus as BusType } from "@/types";
-import { cn } from "@/lib/utils";
 
 const Index = () => {
   const { t } = useTranslation();
@@ -60,237 +59,98 @@ const Index = () => {
   return (
     <Layout>
       {/* Hero Section */}
-      <section className="relative min-h-[90vh] flex items-center justify-center overflow-hidden">
-        {/* Background Gradient */}
-        <div className="absolute inset-0 bg-gradient-hero opacity-5" />
-        <div className="absolute top-1/4 -left-32 w-96 h-96 bg-accent/20 rounded-full blur-3xl" />
-        <div className="absolute bottom-1/4 -right-32 w-96 h-96 bg-primary/20 rounded-full blur-3xl" />
+      <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-[#0a0d14]">
+        {/* Dynamic Background Elements */}
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(13,148,136,0.1),transparent_50%)]" />
+        <div className="absolute top-0 left-0 w-full h-full bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-10" />
+        
+        <div className="absolute top-1/4 -left-32 w-[500px] h-[500px] bg-teal-500/10 rounded-full blur-[120px] animate-pulse-slow" />
+        <div className="absolute bottom-1/4 -right-32 w-[500px] h-[500px] bg-primary/10 rounded-full blur-[120px] animate-pulse-slow stagger-3" />
 
-        <div className="section-container relative z-10 py-20">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
+        <div className="section-container relative z-10 py-24">
+          <div className="grid lg:grid-cols-2 gap-16 items-center">
             {/* Hero Content */}
             <div className="text-center lg:text-left">
-              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-accent/10 text-accent text-sm font-medium mb-6">
-                <span className="w-2 h-2 rounded-full bg-success animate-pulse-dot" />
-                Live Bus Tracking for Tirunelveli
+              <div className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full bg-white/5 border border-white/10 text-teal-400 text-[10px] font-black uppercase tracking-[0.3em] mb-8 backdrop-blur-md shadow-2xl">
+                <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_10px_rgba(16,185,129,0.8)]" />
+                Live Transit Network Operational
               </div>
 
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-foreground mb-6">
-                {t("hero_title_1")}{" "}
-                <span className="gradient-text">{t("hero_title_2")}</span>
+              <h1 className="text-5xl md:text-7xl lg:text-8xl font-black text-white leading-[0.9] tracking-tighter mb-8 italic">
+                TRACK <span className="text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-emerald-500">EVERY</span> <br/>
+                MOVE.
               </h1>
 
-              <p className="text-lg text-muted-foreground mb-8 max-w-xl mx-auto lg:mx-0">
-                {t("hero_subtitle")}
+              <p className="text-xl text-slate-400 mb-10 max-w-xl mx-auto lg:mx-0 font-medium leading-relaxed">
+                Tirunelveli's most advanced bus tracking ecosystem. Real-time locations, smart ETA, and driver-verified updates in the palm of your hand.
               </p>
 
-              <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
+              <div className="flex flex-col sm:flex-row gap-5 justify-center lg:justify-start">
                 <Link to="/buses">
-                  <Button variant="hero" size="xl">
+                  <Button className="h-16 px-10 bg-teal-500 hover:bg-teal-600 text-white font-black uppercase tracking-widest text-xs rounded-2xl shadow-2xl shadow-teal-500/30 transform hover:-translate-y-1 transition-all">
                     <Bus className="w-5 h-5" />
-                    {t("track_buses_now")}
+                    Launch Tracker
                   </Button>
                 </Link>
                 <Link to="/bus-directory">
-                  <Button variant="hero-outline" size="xl">
+                  <Button variant="outline" className="h-16 px-10 border-white/10 bg-white/5 text-white hover:bg-white/10 font-black uppercase tracking-widest text-xs rounded-2xl backdrop-blur-md">
                     <MapPin className="w-5 h-5" />
-                    {t("bus_directory")}
-                    <ArrowRight className="w-5 h-5" />
+                    Quick Search
+                    <ArrowRight className="w-5 h-5 ml-2" />
                   </Button>
                 </Link>
               </div>
 
-              {/* Trust Indicators */}
-              <div className="mt-10 flex flex-wrap items-center gap-6 justify-center lg:justify-start">
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <CheckCircle2 className="w-4 h-4 text-success" />
-                  {t("free_to_use")}
-                </div>
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <CheckCircle2 className="w-4 h-4 text-success" />
-                  {t("real_time_updates")}
-                </div>
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <CheckCircle2 className="w-4 h-4 text-success" />
-                  {t("driver_verified")}
-                </div>
-              </div>
-            </div>
-
-            {/* Hero Visual - Live Terminal Preview */}
-            <div className="relative hidden lg:block animate-scale-in">
-              <div className="absolute -inset-4 bg-gradient-to-br from-primary/20 via-accent/10 to-transparent rounded-[3rem] blur-2xl opacity-50" />
-              <div className="relative bg-[#0a0c10] border border-slate-800 rounded-[2.5rem] shadow-2xl p-6 overflow-hidden min-h-[500px]">
-                {/* Terminal Header */}
-                <div className="flex items-center justify-between mb-6 pb-4 border-b border-slate-800">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-amber-500/10 flex items-center justify-center border border-amber-500/20">
-                      <Bus className="w-5 h-5 text-amber-500" />
-                    </div>
-                    <div>
-                      <h3 className="text-white font-black text-sm tracking-tight uppercase">Live Terminal Board</h3>
-                      <p className="text-[10px] text-amber-500/70 font-bold uppercase tracking-widest">Tirunelveli Junction</p>
-                    </div>
-                  </div>
-                  <div className="px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20">
-                    <span className="text-[10px] text-emerald-500 font-black uppercase tracking-widest animate-pulse">Live</span>
-                  </div>
-                </div>
-
-                {/* Mini Metric Grid */}
-                <div className="grid grid-cols-2 gap-3 mb-6">
-                  <div className="bg-slate-900/50 p-3 rounded-2xl border border-slate-800/50">
-                    <p className="text-[8px] text-slate-500 font-black uppercase tracking-widest mb-1">Active</p>
-                    <p className="text-2xl font-black text-white">24</p>
-                  </div>
-                  <div className="bg-slate-900/50 p-3 rounded-2xl border border-slate-800/50">
-                    <p className="text-[8px] text-slate-500 font-black uppercase tracking-widest mb-1">On Time</p>
-                    <p className="text-2xl font-black text-emerald-500">92%</p>
-                  </div>
-                </div>
-
-                {/* Sample Board Rows */}
-                <div className="space-y-3">
-                  {[
-                    { no: "TN67-102", to: "Madurai", time: "10:15", status: "Arriving", color: "text-emerald-500" },
-                    { no: "TN72-452", to: "Kanyakumari", time: "10:30", status: "On-Route", color: "text-amber-500" },
-                    { no: "TN68-888", to: "Tuticorin", time: "10:45", status: "Delayed", color: "text-rose-500" },
-                  ].map((row, i) => (
-                    <div key={i} className="flex items-center justify-between p-3 rounded-xl bg-slate-900/30 border border-slate-800/30">
-                      <div>
-                        <p className="text-[10px] text-slate-500 font-black tracking-widest">{row.no}</p>
-                        <p className="text-sm font-bold text-white uppercase">{row.to}</p>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-xs font-black text-slate-400">{row.time}</p>
-                        <p className={cn("text-[10px] font-black uppercase", row.color)}>{row.status}</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-
-                {/* Radar Scan Decoration */}
-                <div className="absolute -bottom-20 -right-20 w-64 h-64 border border-teal-500/20 rounded-full flex items-center justify-center">
-                  <div className="w-48 h-48 border border-teal-500/10 rounded-full animate-ping" />
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Real-Time Fleet Radar (New Section) */}
-      <section className="py-24 relative bg-[#06080c] overflow-hidden">
-        <div className="section-container">
-          <div className="grid lg:grid-cols-12 gap-12 items-center">
-            <div className="lg:col-span-4">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-[10px] font-black uppercase tracking-widest mb-6 border border-primary/20">
-                <MapPin className="w-3 h-3" /> System Intelligence
-              </div>
-              <h2 className="text-4xl md:text-5xl font-black text-white mb-6 tracking-tight leading-tight">
-                Real-Time <span className="text-primary italic text-6xl block mt-2">Fleet Radar</span>
-              </h2>
-              <p className="text-slate-400 text-lg font-medium mb-10 leading-relaxed">
-                Experience the power of real-time geospatial intelligence. Monitor every bus across the Tirunelveli network with sub-second latency and precise driver-verified coordinates.
-              </p>
-              
-              <div className="grid grid-cols-2 gap-6 mb-10">
+              {/* Stats Bar */}
+              <div className="mt-16 pt-16 border-t border-white/5 flex flex-wrap items-center gap-12 justify-center lg:justify-start">
                 <div>
-                  <p className="text-4xl font-black text-white mb-1">98%</p>
-                  <p className="text-[10px] text-slate-500 font-black uppercase tracking-widest">Tracking Accuracy</p>
+                   <p className="text-3xl font-black text-white">450+</p>
+                   <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Active Buses</p>
                 </div>
                 <div>
-                  <p className="text-4xl font-black text-primary mb-1">&lt;1s</p>
-                  <p className="text-[10px] text-slate-500 font-black uppercase tracking-widest">Update Latency</p>
+                   <p className="text-3xl font-black text-white">12k</p>
+                   <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Daily Commuters</p>
+                </div>
+                <div>
+                   <p className="text-3xl font-black text-white">99%</p>
+                   <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Tracking Accuracy</p>
                 </div>
               </div>
-
-              <Link to="/auth?mode=register">
-                <Button variant="hero" className="w-full sm:w-auto h-16 px-10 rounded-2xl group">
-                  Connect to Network
-                  <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
-                </Button>
-              </Link>
             </div>
 
-            <div className="lg:col-span-8 bg-slate-900 border border-slate-800 rounded-[3rem] p-2 shadow-2xl relative">
-              <div className="absolute top-8 right-8 z-20 flex flex-col gap-2">
-                <div className="bg-slate-900/80 backdrop-blur-md px-4 py-2 rounded-full border border-slate-800 text-[10px] font-black text-emerald-500 uppercase tracking-widest flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                  84 Active Units
-                </div>
-              </div>
-              <div className="aspect-[16/9] bg-slate-800 rounded-[2.5rem] overflow-hidden relative">
-                 <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1524661135-423995f22d0b?auto=format&fit=crop&q=80')] bg-cover bg-center brightness-50 contrast-125" />
-                 <div className="absolute inset-0 bg-primary/10 mix-blend-color" />
+            {/* Hero Visual - Premium Map Preview */}
+            <div className="relative group perspective-1000">
+              <div className="absolute -inset-4 bg-gradient-to-tr from-teal-500/20 to-primary/20 blur-3xl opacity-50 group-hover:opacity-100 transition-opacity duration-1000" />
+              <div className="relative glass-card border-white/10 p-2 rounded-[3rem] overflow-hidden transform rotate-3 hover:rotate-0 transition-all duration-700 shadow-2xl">
+                 <div className="absolute inset-0 bg-slate-900/40 z-10" />
+                 <img 
+                   src="https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?q=80&w=2069&auto=format&fit=crop" 
+                   alt="Transit System" 
+                   className="w-full h-[600px] object-cover grayscale opacity-50 contrast-125"
+                 />
                  
-                 {/* Simulated Map Markers */}
-                 <div className="absolute top-1/2 left-1/3 w-8 h-8 rounded-full bg-primary flex items-center justify-center shadow-[0_0_20px_rgba(255,107,0,0.5)] border-2 border-white animate-bounce">
-                    <Bus className="w-4 h-4 text-white" />
+                 {/* Floating UI Elements over image */}
+                 <div className="absolute top-12 left-12 z-20 space-y-4">
+                    {[0, 1].map((i) => (
+                       <div key={i} className={`p-6 premium-glass rounded-3xl w-72 animate-slide-up stagger-${i+2}`}>
+                          <div className="flex justify-between items-center mb-4">
+                             <div className="w-10 h-10 rounded-xl bg-teal-500/20 flex items-center justify-center">
+                                <Bus className="w-5 h-5 text-teal-500" />
+                             </div>
+                             <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                          </div>
+                          <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Bus {i === 0 ? '72N-1234' : '72N-5678'}</p>
+                          <h4 className="font-black text-white tracking-tight">NELLAI EXPRESS</h4>
+                       </div>
+                    ))}
                  </div>
-                 <div className="absolute top-1/3 right-1/4 w-8 h-8 rounded-full bg-teal-500 flex items-center justify-center shadow-[0_0_20px_rgba(20,184,166,0.5)] border-2 border-white animate-bounce [animation-delay:-0.2s]">
-                    <Bus className="w-4 h-4 text-white" />
-                 </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
 
-      {/* Arrivals & Departures Header */}
-      <section className="py-12 bg-slate-50 border-y border-slate-100">
-        <div className="section-container flex flex-col md:flex-row justify-between items-center gap-6">
-           <div className="flex items-center gap-6">
-              <div>
-                <h3 className="text-2xl font-black text-slate-800 tracking-tight flex items-center gap-3">
-                  <Clock className="w-6 h-6 text-primary" /> Current Departures
-                </h3>
-                <p className="text-sm font-medium text-slate-500">Live board for upcoming services from the main terminal</p>
+                 <div className="absolute bottom-12 right-12 z-20 p-8 premium-glass rounded-3xl w-80 text-center">
+                    <Wifi className="w-8 h-8 mx-auto mb-4 text-teal-400 animate-pulse" />
+                    <h3 className="text-lg font-black text-white uppercase tracking-tighter">Live Sync Active</h3>
+                    <p className="text-xs text-slate-400 mt-2 font-medium">Real-time telemetry connection established across all fleet units.</p>
+                 </div>
               </div>
-           </div>
-           <div className="flex items-center gap-3">
-              <div className="h-10 px-4 flex items-center gap-2 bg-white rounded-full border border-slate-200">
-                 <span className="w-2 h-2 rounded-full bg-emerald-500" />
-                 <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Active</span>
-              </div>
-              <div className="h-10 px-4 flex items-center gap-2 bg-white rounded-full border border-slate-200">
-                 <span className="w-2 h-2 rounded-full bg-amber-500" />
-                 <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Delayed</span>
-              </div>
-           </div>
-        </div>
-      </section>
-      {/* Homepage Metrics Summary */}
-      <section className="py-12 bg-white">
-        <div className="section-container">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-            <div className="glass-card p-6 rounded-3xl border border-slate-100 flex flex-col items-center text-center">
-               <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center mb-4">
-                  <Bus className="w-6 h-6" />
-               </div>
-               <p className="text-3xl font-black text-slate-800">24</p>
-               <p className="text-[10px] text-slate-500 font-black uppercase tracking-widest mt-1">Live Services</p>
-            </div>
-            <div className="glass-card p-6 rounded-3xl border border-slate-100 flex flex-col items-center text-center">
-               <div className="w-12 h-12 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center mb-4">
-                  <MapPin className="w-6 h-6" />
-               </div>
-               <p className="text-3xl font-black text-slate-800">18</p>
-               <p className="text-[10px] text-slate-500 font-black uppercase tracking-widest mt-1">On Route</p>
-            </div>
-            <div className="glass-card p-6 rounded-3xl border border-slate-100 flex flex-col items-center text-center">
-               <div className="w-12 h-12 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center mb-4">
-                  <Clock className="w-6 h-6" />
-               </div>
-               <p className="text-3xl font-black text-slate-800">2</p>
-               <p className="text-[10px] text-slate-500 font-black uppercase tracking-widest mt-1">Delays Reported</p>
-            </div>
-            <div className="glass-card p-6 rounded-3xl border border-slate-100 flex flex-col items-center text-center">
-               <div className="w-12 h-12 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center mb-4">
-                  <CheckCircle2 className="w-6 h-6" />
-               </div>
-               <p className="text-3xl font-black text-slate-800">100%</p>
-               <p className="text-[10px] text-slate-500 font-black uppercase tracking-widest mt-1">System Health</p>
             </div>
           </div>
         </div>
