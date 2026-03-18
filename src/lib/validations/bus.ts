@@ -7,7 +7,7 @@ export const busSchema = z.object({
     routeTo: z.string().min(2, "End point must be at least 2 characters"),
     capacity: z.coerce.number().min(1, "Capacity must be at least 1").max(100, "Capacity cannot exceed 100"),
     ac: z.boolean().default(false),
-    status: z.enum(["on-time", "delayed", "arriving", "departed", "unavailable", "completed", "not-started"]).optional(),
+    status: z.enum(["active", "inactive", "on-route", "delayed", "on-time", "arriving", "departed", "unavailable", "completed", "not-started"]).optional(),
     platformNumber: z.coerce.number().min(0).max(50).optional(),
     busType: z.enum(['Town Bus', 'Mofussil', 'Express', 'Deluxe', 'AC', 'Ultra Deluxe', 'SFS']).optional(),
     serviceType: z.enum(['Ordinary', 'Express', 'Special', '1to1', 'EAC', 'BPR']).optional(),
@@ -17,6 +17,14 @@ export const busSchema = z.object({
     driverPhone: z.string().optional(),
     conductorName: z.string().optional(),
     conductorPhone: z.string().optional(),
+    isActive: z.boolean().default(false),
+    crowdLevel: z.enum(["low", "medium", "high", "full"]).optional(),
+    intermediateStops: z.array(z.object({
+        name: z.string(),
+        lat: z.coerce.number(),
+        lng: z.coerce.number(),
+        order: z.number()
+    })).optional(),
 });
 
 export type BusFormData = z.infer<typeof busSchema>;

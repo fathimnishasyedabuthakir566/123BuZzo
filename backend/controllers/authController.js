@@ -67,14 +67,25 @@ const registerUser = asyncHandler(async (req, res) => {
 // @route   POST /api/users/login
 // @access  Public
 const loginUser = asyncHandler(async (req, res) => {
-    const { email, password } = req.body;
+    const { email, password, role } = req.body;
 
-    console.log('Login attempt for:', email);
+    console.log('Login attempt for:', email, 'Expected Role:', role);
 
     // Check for user email
     const user = await User.findOne({ email });
 
-    if (user && user.isBlocked) {
+    if (!user) {
+        res.status(401);
+        throw new Error('Invalid email or password');
+    }
+
+    // Role validation - strictly check if user's role matches the login path selected
+    if (role && user.role.toUpperCase() !== role.toUpperCase()) {
+        res.status(403);
+        throw new Error(`Unauthorized: This account is not a ${role.toUpperCase()}`);
+    }
+
+    if (user.isBlocked) {
         res.status(403);
         throw new Error('This account has been blocked. Please contact support.');
     }
@@ -133,6 +144,12 @@ const googleLogin = asyncHandler(async (req, res) => {
         let user = await User.findOne({ email });
 
         if (user) {
+            // Role validation if logging into specific portal
+            if (role && user.role.toUpperCase() !== role.toUpperCase()) {
+                res.status(403);
+                throw new Error(`Unauthorized: Your Google account is registered as ${user.role}, not ${role.toUpperCase()}`);
+            }
+
             // User exists: update googleId if not present, and handle login
             if (!user.googleId) {
                 user.googleId = googleId;

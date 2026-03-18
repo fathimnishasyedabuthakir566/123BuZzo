@@ -156,26 +156,37 @@ const LiveMap = ({
         return sorted[sorted.length - 1];
     }, [stops]);
 
-    const journeyStopsNames = useMemo(() => {
-        if (!nearestStopPoint || !destinationStop || !stops || stops.length < 2) return [];
-        const graph: Graph = {};
+    const activeStopNames = useMemo(() => {
+        if (!stops || stops.length === 0) return [];
         const sorted = [...stops].sort((a, b) => a.order - b.order);
-        for (let i = 0; i < sorted.length - 1; i++) {
-            const s1 = sorted[i];
-            const s2 = sorted[i+1];
-            if (!graph[s1.name]) graph[s1.name] = {};
-            graph[s1.name][s2.name] = calculateDistance(s1.lat, s1.lng, s2.lat, s2.lng);
+        let startIndex = 0;
+        if (nextStop) {
+            const idx = sorted.findIndex(s => s.name === nextStop);
+            if (idx !== -1) startIndex = idx;
+        } else if (nearestStopPoint) {
+            const idx = sorted.findIndex(s => s.name === nearestStopPoint.name);
+            if (idx !== -1) startIndex = idx;
         }
-        const { previous } = dijkstra(graph, nearestStopPoint.name);
-        return getShortestPath(previous, destinationStop.name);
-    }, [stops, nearestStopPoint, destinationStop]);
+        return sorted.slice(startIndex).map(s => s.name);
+    }, [stops, nextStop, nearestStopPoint]);
 
-    const journeyPathCoords = useMemo(() => {
-        return journeyStopsNames.map(name => {
-            const s = stops.find(st => st.name === name);
-            return [s?.lat || 0, s?.lng || 0] as [number, number];
-        }).filter(p => p[0] !== 0);
-    }, [journeyStopsNames, stops]);
+    const activeRouteCoords = useMemo(() => {
+        if (!stops || stops.length === 0) return [];
+        const sorted = [...stops].sort((a, b) => a.order - b.order);
+        let startIndex = 0;
+        if (nextStop) {
+            const idx = sorted.findIndex(s => s.name === nextStop);
+            if (idx !== -1) startIndex = idx;
+        } else if (nearestStopPoint) {
+            const idx = sorted.findIndex(s => s.name === nearestStopPoint.name);
+            if (idx !== -1) startIndex = idx;
+        }
+        const remainingStops = sorted.slice(startIndex);
+        return [
+            [displayPosition.lat, displayPosition.lng] as [number, number],
+            ...remainingStops.map(s => [s.lat, s.lng] as [number, number])
+        ];
+    }, [stops, nextStop, nearestStopPoint, displayPosition]);
 
     return (
         <div className="h-full w-full relative bg-slate-50">
@@ -199,27 +210,27 @@ const LiveMap = ({
                     />
                 )}
 
-                {/* HIGHLIGHT: Point 2 to 3 (Animated Bus Segment) */}
-                {journeyPathCoords.length > 0 && (
+                {/* Active Route: Bus Location -> Destination via Intermediate Stops */}
+                {activeRouteCoords.length > 1 && (
                     <>
                         <Polyline
-                            positions={journeyPathCoords}
+                            positions={activeRouteCoords}
                             pathOptions={{ color: '#3B82F6', weight: 8, opacity: 0.2, lineJoin: 'round' }}
                         />
                         <Polyline
-                            positions={journeyPathCoords}
+                            positions={activeRouteCoords}
                             pathOptions={{ color: '#2563EB', weight: 5, opacity: 1, lineJoin: 'round', dashArray: '1, 15' }}
                             className="animate-pulse"
                         />
                     </>
                 )}
 
-                {/* Path from User (Point 1) to Boarding (Point 2) */}
-                {userLocation && nearestStopPoint && (
+                {/* Path from User Location to Real-Time Bus Location */}
+                {userLocation && displayPosition.lat && (
                     <Polyline
                         positions={[
                             [userLocation.lat, userLocation.lng],
-                            [nearestStopPoint.lat, nearestStopPoint.lng]
+                            [displayPosition.lat, displayPosition.lng]
                         ]}
                         pathOptions={{ color: '#10B981', weight: 4, opacity: 0.8, dashArray: '5, 10' }}
                     />
@@ -230,8 +241,8 @@ const LiveMap = ({
                     const isBoarding = nearestStopPoint?.name === stop.name;
                     const isDestination = destinationStop?.name === stop.name;
                     const isNext = nextStop === stop.name;
-                    const isIntermediate = journeyStopsNames.includes(stop.name) && !isBoarding && !isDestination;
-                    const isRelevant = journeyStopsNames.includes(stop.name);
+                    const isIntermediate = activeStopNames.includes(stop.name) && !isDestination;
+                    const isRelevant = activeStopNames.includes(stop.name);
                     
                     const distToStop = calculateDistance(displayPosition.lat, displayPosition.lng, stop.lat, stop.lng);
                     const etaToStop = Math.ceil((distToStop / 35) * 60);
@@ -338,8 +349,8 @@ const LiveMap = ({
                                 </div>
                                 <div className="flex-1">
                                     <p className="text-[10px] font-black text-blue-600 uppercase tracking-widest leading-none mb-1">Point 1</p>
-                                    <p className="text-sm font-black text-slate-800">Your Base</p>
-                                    <p className="text-[10px] font-bold text-slate-400 mt-1 uppercase">{calculateWalkingTime(nearestStopPoint.distance)} MIN WALK TO BOARDING</p>
+                                    <p className="text-sm font-black text-slate-800">Your Location</p>
+                                    <p className="text-[10px] font-bold text-slate-400 mt-1 uppercase">BUS IS {calculateDistance(userLocation.lat, userLocation.lng, displayPosition.lat, displayPosition.lng).toFixed(2)} KM AWAY</p>
                                 </div>
                             </div>
 

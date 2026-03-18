@@ -28,6 +28,7 @@ const AdminSidebar = ({
     { id: "drivers", label: "Manage Drivers", icon: UserIcon, href: "/admin?view=drivers" },
     { id: "passengers", label: "Passenger Records", icon: TrendingUp, href: "/admin?view=passengers" },
     { id: "location", label: "System-Wide Map", icon: MapPin, href: "/admin?view=location" },
+    { id: "terminal", label: "Live Terminal Board", icon: LayoutDashboard, href: "/live-terminal" },
     { id: "analytics", label: "Trip Analytics", icon: TrendingUp, href: "/admin?view=analytics" },
     { id: "users", label: "User Activity", icon: UserIcon, href: "/admin?view=users" },
   ];
