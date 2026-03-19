@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { Layout } from "@/components/layout";
-import { Plus, Search, Square, User as UserIcon, MapPin } from "lucide-react";
+import { Plus, Search, Square, User as UserIcon, MapPin, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   AdminSidebar,
@@ -13,6 +13,7 @@ import {
   TripAnalytics,
   DriverManager,
   PassengerRecords,
+  PredictiveMaintenance,
 } from "@/components/admin";
 import type { Bus, User } from "@/types";
 import { socketService } from "@/services/socketService";
@@ -41,6 +42,9 @@ const AdminDashboard = () => {
 
   // Tracking State
   const [trackedBusId, setTrackedBusId] = useState<string | null>(null);
+  const [isSimulating, setIsSimulating] = useState(false);
+  const [isPlacementMode, setIsPlacementMode] = useState(false);
+  const [simulationInterval, setSimulationInterval] = useState<NodeJS.Timeout | null>(null);
   const watchIdRef = useRef<number | null>(null);
 
   const fetchBuses = useCallback(async () => {
@@ -82,38 +86,58 @@ const AdminDashboard = () => {
     };
   }, [navigate, fetchBuses]);
 
-  const handleStartTracking = (busId: string) => {
+  const handleStartTracking = (busId: string, simulate: boolean = false) => {
     if (trackedBusId) {
       toast.error("You are already tracking a bus. Stop it first.");
       return;
     }
 
-    if (!('geolocation' in navigator)) {
-      toast.error("Geolocation is not supported by your browser");
+    socketService.joinRoute(busId);
+    setTrackedBusId(busId);
+    setIsSimulating(simulate);
+
+    if (simulate) {
+      toast.info(`Starting CLOUD SIMULATION for bus ${busId}...`);
+      let mockLat = 8.7139;
+      let mockLng = 77.7567;
+      
+      const interval = setInterval(() => {
+        mockLat += (Math.random() - 0.5) * 0.001;
+        mockLng += (Math.random() - 0.5) * 0.001;
+        
+        socketService.sendLocation(busId, mockLat, mockLng);
+      }, 3000);
+      
+      setSimulationInterval(interval);
       return;
     }
 
-    toast.info(`Starting tracking for bus ${busId}...`);
-    socketService.joinRoute(busId); // Driver joins the room too
-    setTrackedBusId(busId);
+    if (!('geolocation' in navigator)) {
+      toast.error("Geolocation is not supported by your browser. Use Simulator mode.");
+      handleStopTracking();
+      return;
+    }
+
+    toast.info(`Starting LIVE GPS tracking for bus ${busId}...`);
 
     const id = navigator.geolocation.watchPosition(
       (position) => {
         const { latitude, longitude } = position.coords;
-        socketService.emit('update-location', {
-          routeId: busId,
-          lat: latitude,
-          lng: longitude
-        });
+        socketService.sendLocation(busId, latitude, longitude);
       },
       (error) => {
-        console.error("Error getting location", error);
-        toast.error("Geolocation failed: " + error.message);
+        console.error("GPS Error:", error);
+        let msg = "Geolocation failed.";
+        if (error.code === 1) msg = "GPS Permission Denied. Try Simulator mode.";
+        else if (error.code === 2) msg = "GPS Signal Lost.";
+        else if (error.code === 3) msg = "GPS Timeout.";
+        
+        toast.error(msg);
         handleStopTracking();
       },
       {
         enableHighAccuracy: true,
-        timeout: 5000,
+        timeout: 10000,
         maximumAge: 0
       }
     );
@@ -125,8 +149,20 @@ const AdminDashboard = () => {
       navigator.geolocation.clearWatch(watchIdRef.current);
       watchIdRef.current = null;
     }
+    
+    if (simulationInterval) {
+      clearInterval(simulationInterval);
+      setSimulationInterval(null);
+    }
+
     setTrackedBusId(null);
-    toast.success("Stopped tracking");
+    setIsSimulating(false);
+    toast.success("Tracking system deactivated");
+  };
+
+  const handleManualLocationUpdate = (busId: string, lat: number, lng: number) => {
+    socketService.sendLocation(busId, lat, lng);
+    toast.success("Manual location broadcasted!");
   };
 
   const handleUpdateBus = async (id: string, data: Partial<Bus>) => {
@@ -314,13 +350,79 @@ const AdminDashboard = () => {
             )}
 
             {activeTab === 'location' && (
-              <div className="glass-card rounded-xl overflow-hidden h-[600px] border-2 border-primary/10">
-                <AllBusesMap initialBuses={buses} />
+              <div className="space-y-4">
+                <div className="glass-card p-4 rounded-xl flex flex-wrap items-center justify-between gap-4">
+                   <div className="flex items-center gap-3">
+                      <div className="p-2 bg-primary/10 rounded-lg">
+                         <MapPin className="w-5 h-5 text-primary" />
+                      </div>
+                      <div>
+                         <h3 className="font-bold text-foreground">Interactive Tracking Map</h3>
+                         <p className="text-xs text-muted-foreground">Monitor or update bus positions in real-time</p>
+                      </div>
+                   </div>
+
+                   <div className="flex items-center gap-3">
+                      <div className="flex flex-col items-end">
+                         <span className="text-[10px] uppercase font-black tracking-widest text-muted-foreground mb-1">Placement Mode</span>
+                         <Button 
+                            variant={isPlacementMode ? "accent" : "outline"} 
+                            size="sm" 
+                            onClick={() => setIsPlacementMode(!isPlacementMode)}
+                            className="h-8 px-4 rounded-lg font-bold"
+                          >
+                            {isPlacementMode ? "CANCEL" : "ENTER"}
+                         </Button>
+                      </div>
+
+                      <div className="h-10 w-px bg-border mx-2" />
+
+                      <div className="flex flex-col">
+                        <span className="text-[10px] uppercase font-black tracking-widest text-muted-foreground mb-1">Simulator Status</span>
+                        <div className="flex items-center gap-2">
+                           <div className={`w-2 h-2 rounded-full ${isSimulating ? 'bg-accent animate-pulse' : 'bg-slate-300'}`} />
+                           <span className="text-xs font-bold text-foreground">{isSimulating ? 'SIMULATING' : 'IDLE'}</span>
+                        </div>
+                      </div>
+                   </div>
+                </div>
+
+                {isPlacementMode && (
+                  <div className="bg-accent/10 border border-accent/20 p-4 rounded-xl flex items-center gap-4 animate-in fade-in slide-in-from-top-1">
+                    <AlertCircle className="w-5 h-5 text-accent shrink-0" />
+                    <div className="flex-1">
+                      <p className="text-sm font-bold text-accent">Tap anywhere on the map below to broadcast a manual location update.</p>
+                      <p className="text-xs text-muted-foreground">This bypasses GPS hardware. Useful if you have a weak signal.</p>
+                    </div>
+                  </div>
+                )}
+
+                <div className="glass-card rounded-xl overflow-hidden h-[600px] border-2 border-primary/10 relative">
+                  <AllBusesMap 
+                    initialBuses={buses} 
+                    isPlacementMode={isPlacementMode}
+                    onMapClick={(lat, lng) => {
+                      if (!isPlacementMode) return;
+                      // Use the first bus if nothing selected, or handle logically
+                      const targetBusId = trackedBusId || buses[0]?.id;
+                      if (!targetBusId) {
+                        toast.error("No bus selected to update");
+                        return;
+                      }
+                      handleManualLocationUpdate(targetBusId, lat, lng);
+                      setIsPlacementMode(false);
+                    }}
+                  />
+                </div>
               </div>
             )}
 
             {activeTab === 'analytics' && (
               <TripAnalytics buses={buses} />
+            )}
+
+            {activeTab === 'maintenance' && (
+              <PredictiveMaintenance />
             )}
 
             {activeTab === 'users' && (
@@ -540,6 +642,7 @@ const UserActivityTable = () => {
                   </td>
                   <td className="p-4 text-sm" onClick={e => e.stopPropagation()}>
                     <div className="flex gap-2">
+                       <Button variant="secondary" size="sm" className="h-8" onClick={() => setSelectedUser(user)}>View Details</Button>
                        {user.isBlocked ? (
                           <Button variant="outline" size="sm" className="text-success border-success/30 hover:bg-success/10 h-8" onClick={() => handleUnblockUser(user._id)}>Unblock</Button>
                         ) : (

@@ -19,7 +19,7 @@ export const registerSchema = z.object({
 
 export const userProfileSchema = z.object({
     name: z.string().min(2, "Name must be at least 2 characters"),
-    phone: z.string().regex(/^\d{10}$/, "Phone number must be exactly 10 digits"),
+    phone: z.string().min(10, "Phone number must be at least 10 digits"),
     city: z.string().min(2, "City name must be at least 2 characters").optional().or(z.literal("")),
 });
 

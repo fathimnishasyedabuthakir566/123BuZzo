@@ -17,6 +17,7 @@ export interface Notification {
 
 export const notificationService = {
     async getNotifications(userId: string, unreadOnly = false): Promise<{ notifications: Notification[]; unreadCount: number }> {
+        if (!userId) return { notifications: [], unreadCount: 0 };
         try {
             const res = await fetch(`${API_URL}/${userId}?unreadOnly=${unreadOnly}`);
             if (!res.ok) throw new Error('Failed to fetch');

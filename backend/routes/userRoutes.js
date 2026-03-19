@@ -8,6 +8,8 @@ router.post('/', registerUser);
 router.post('/login', loginUser);
 router.post('/google-login', googleLogin);
 router.get('/me', protect, getMe);
+router.put('/profile', protect, updateUserProfile);
+router.post('/upload-image', protect, upload.single('image'), uploadProfileImage);
 
 // Admin only routes
 router.get('/activity', protect, admin, getUserActivity);

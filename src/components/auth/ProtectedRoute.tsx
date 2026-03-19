@@ -42,12 +42,13 @@ const ProtectedRoute = ({ children, allowedRoles }: ProtectedRouteProps) => {
     return <Navigate to="/auth?mode=login" state={{ from: location }} replace />;
   }
 
-  if (allowedRoles && !allowedRoles.includes(user.role.toLowerCase() as UserRole)) {
+  if (allowedRoles && !allowedRoles.includes((user.role || 'user').toLowerCase() as UserRole)) {
     // If user doesn't have required role, redirect to their own dashboard
     console.warn(`Access denied. User role: ${user.role}. Allowed: ${allowedRoles}`);
     
-    if (user.role.toLowerCase() === 'admin') return <Navigate to="/admin" replace />;
-    if (user.role.toLowerCase() === 'driver') return <Navigate to="/driver" replace />;
+    const role = (user.role || 'user').toLowerCase();
+    if (role === 'admin') return <Navigate to="/admin" replace />;
+    if (role === 'driver') return <Navigate to="/driver" replace />;
     return <Navigate to="/dashboard" replace />;
   }
 

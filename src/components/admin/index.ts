@@ -7,3 +7,4 @@ export { default as QuickUpdatePanel } from "./QuickUpdatePanel";
 export { default as AddBusModal } from "./AddBusModal";
 export { default as EditBusModal } from "./EditBusModal";
 export { default as TripAnalytics } from "./TripAnalytics";
+export { default as PredictiveMaintenance } from "./PredictiveMaintenance";

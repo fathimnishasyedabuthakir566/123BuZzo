@@ -21,9 +21,24 @@ L.Marker.prototype.options.icon = DefaultIcon;
 
 interface AllBusesMapProps {
     initialBuses: Bus[];
+    onMapClick?: (lat: number, lng: number) => void;
+    isPlacementMode?: boolean;
 }
 
-const AllBusesMap = ({ initialBuses }: AllBusesMapProps) => {
+import { useMapEvents } from 'react-leaflet';
+
+const MapClickHandler = ({ onClick, active }: { onClick: (lat: number, lng: number) => void, active: boolean }) => {
+    useMapEvents({
+        click(e) {
+            if (active) {
+                onClick(e.latlng.lat, e.latlng.lng);
+            }
+        },
+    });
+    return null;
+};
+
+const AllBusesMap = ({ initialBuses, onMapClick, isPlacementMode }: AllBusesMapProps) => {
     const [buses, setBuses] = useState<Bus[]>(initialBuses);
 
     useEffect(() => {
@@ -89,11 +104,14 @@ const AllBusesMap = ({ initialBuses }: AllBusesMapProps) => {
 
     return (
         <div className="h-[500px] w-full rounded-2xl overflow-hidden shadow-xl border-4 border-white/10 mb-8 mt-6">
-            <MapContainer center={center} zoom={12} scrollWheelZoom={true} style={{ height: '100%', width: '100%' }}>
+            <MapContainer center={center} zoom={12} scrollWheelZoom={true} style={{ height: '100%', width: '100%', cursor: isPlacementMode ? 'crosshair' : 'grab' }}>
                 <TileLayer
                     attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                     url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                 />
+                
+                {onMapClick && <MapClickHandler onClick={onMapClick} active={isPlacementMode || false} />}
+
                 {buses.map(bus => bus.location && (
                     <Marker key={bus.id} position={[bus.location.lat, bus.location.lng]} icon={busIcon(bus.status, bus.isActive)}>
                         <Popup className="rounded-xl overflow-hidden">

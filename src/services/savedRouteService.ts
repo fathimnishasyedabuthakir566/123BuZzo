@@ -18,6 +18,7 @@ export interface SavedRoute {
 
 export const savedRouteService = {
     async getRoutes(userId: string): Promise<SavedRoute[]> {
+        if (!userId) return [];
         try {
             const res = await fetch(`${API_URL}/${userId}`);
             if (!res.ok) throw new Error('Failed');

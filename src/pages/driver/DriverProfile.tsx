@@ -10,6 +10,7 @@ import { useNavigate } from "react-router-dom";
 import { PhotoUpload } from "@/components/profile/PhotoUpload";
 import { toast } from "sonner";
 import { format } from "date-fns";
+import { safeFormat } from "@/lib/date-utils";
 
 const MetricCard = ({ label, value, icon: Icon, color }: { label: string, value: string | number, icon: React.ElementType, color: string }) => (
     <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm flex items-center justify-between group hover:shadow-md transition-all">
@@ -182,6 +183,10 @@ const DriverProfile = () => {
                         {isEditing ? (
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-8 bg-white/80 p-6 rounded-2xl glass-card">
                                 <div>
+                                    <label className="text-xs font-bold text-slate-500 uppercase">Full Name</label>
+                                    <input type="text" className="w-full mt-1 p-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-primary outline-none" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} />
+                                </div>
+                                <div>
                                     <label className="text-xs font-bold text-slate-500 uppercase">Phone Number</label>
                                     <input type="text" className="w-full mt-1 p-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-primary outline-none" value={formData.phone} onChange={e => setFormData({...formData, phone: e.target.value})} />
                                 </div>
@@ -244,7 +249,7 @@ const DriverProfile = () => {
                                             <div>
                                                 <h4 className="font-bold text-slate-800">{trip.routeName}</h4>
                                                 <p className="text-xs text-slate-500 font-bold uppercase tracking-wider mt-1 flex items-center gap-2">
-                                                    <span>{trip.startTime ? format(new Date(trip.startTime), 'MMM d, yyyy - hh:mm a') : 'Recent'}</span>
+                                                    <span>{safeFormat(trip.startTime, 'MMM d, yyyy - hh:mm a', 'Recent Trip')}</span>
                                                     {trip.status === 'completed' && <span className="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700">Completed</span>}
                                                     {trip.status === 'active' && <span className="px-2 py-0.5 rounded-full bg-blue-100 text-blue-700">Active</span>}
                                                 </p>

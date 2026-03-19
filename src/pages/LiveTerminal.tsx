@@ -26,6 +26,25 @@ const LiveTerminal = () => {
     const [weather, setWeather] = useState({ temp: 32, condition: 'Clear Skies' });
 
     useEffect(() => {
+        const fetchWeather = async () => {
+            try {
+                const res = await fetch('https://api.open-meteo.com/v1/forecast?latitude=8.7139&longitude=77.7567&current_weather=true');
+                const data = await res.json();
+                const code = data.current_weather.weathercode;
+                
+                let cond = 'Clear Skies';
+                if (code >= 1 && code <= 3) cond = 'Partly Cloudy';
+                else if (code >= 45 && code <= 48) cond = 'Foggy';
+                else if (code >= 51 && code <= 67) cond = 'Rainy';
+                else if (code >= 80 && code <= 82) cond = 'Showers';
+                else if (code >= 95) cond = 'Thunderstorms';
+
+                setWeather({ temp: Math.round(data.current_weather.temperature), condition: cond });
+            } catch (err) {
+                console.warn('Weather fetch failed');
+            }
+        };
+
         const fetchBuses = async () => {
             try {
                 const data = await busService.getAllBuses(true);
@@ -38,6 +57,7 @@ const LiveTerminal = () => {
         };
 
         fetchBuses();
+        fetchWeather();
         socketService.connect();
 
         socketService.on('receive-location', (data: any) => {
@@ -65,10 +85,12 @@ const LiveTerminal = () => {
 
         const timer = setInterval(() => setCurrentTime(new Date()), 1000);
         const poll = setInterval(fetchBuses, 30000);
+        const weatherPoll = setInterval(fetchWeather, 900000); // 15 mins
 
         return () => {
             clearInterval(timer);
             clearInterval(poll);
+            clearInterval(weatherPoll);
             socketService.off('receive-location');
         };
     }, []);
@@ -89,10 +111,20 @@ const LiveTerminal = () => {
                 <div className="w-full bg-amber-500 text-black py-1 overflow-hidden whitespace-nowrap">
                    <div className="animate-scroll inline-block">
                       <span className="mx-8 font-black uppercase text-[10px] tracking-widest">
-                         [ WEATHER ADVISORY: {weather.temp}°C {weather.condition} ] • [ NETWORK STATUS: OPTIMAL ] • [ TERMINAL A: OPERATIONAL ] • [ ALL ROUTES TRACKING LIVE ] • [ SYSTEM UPDATED: {format(currentTime, 'HH:mm')} ]
+                         [ ADVISORY: {weather.condition === 'Clear Skies' ? 'OPTIMAL VISIBILITY ACROSS SECTORS' : `RESTRICTIVE VISIBILITY DUE TO ${weather.condition.toUpperCase()}`} ] • 
+                         [ TEMPERATURE: {weather.temp}°C ] • 
+                         [ GRID: TIRUNELVELI CENTRAL ] • 
+                         [ OPS: ALL UNITS SYNCED ] • 
+                         [ CHRONOS: {format(currentTime, 'HH:mm:ss')} ] •
+                         [ AI: PREDICTIVE ENGINE V4.2 ONLINE ]
                       </span>
                       <span className="mx-8 font-black uppercase text-[10px] tracking-widest">
-                         [ WEATHER ADVISORY: {weather.temp}°C {weather.condition} ] • [ NETWORK STATUS: OPTIMAL ] • [ TERMINAL A: OPERATIONAL ] • [ ALL ROUTES TRACKING LIVE ] • [ SYSTEM UPDATED: {format(currentTime, 'HH:mm')} ]
+                         [ ADVISORY: {weather.condition === 'Clear Skies' ? 'OPTIMAL VISIBILITY ACROSS SECTORS' : `RESTRICTIVE VISIBILITY DUE TO ${weather.condition.toUpperCase()}`} ] • 
+                         [ TEMPERATURE: {weather.temp}°C ] • 
+                         [ GRID: TIRUNELVELI CENTRAL ] • 
+                         [ OPS: ALL UNITS SYNCED ] • 
+                         [ CHRONOS: {format(currentTime, 'HH:mm:ss')} ] •
+                         [ AI: PREDICTIVE ENGINE V4.2 ONLINE ]
                       </span>
                    </div>
                 </div>

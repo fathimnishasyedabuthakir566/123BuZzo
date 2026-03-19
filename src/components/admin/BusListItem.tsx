@@ -1,15 +1,25 @@
 import { Link } from "react-router-dom";
-import { Bus, Navigation, Edit2, Trash2, Users } from "lucide-react";
+import { Bus, Navigation, Edit2, Trash2, Users, Square } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import StatusBadge from "@/components/common/StatusBadge";
 import type { Bus as BusType } from "@/types";
+
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu";
+import { Cpu, Satellite } from "lucide-react";
 
 interface BusListItemProps {
   bus: BusType;
   onUpdateLocation?: (busId: string) => void;
   onEdit?: (busId: string) => void;
   onDelete?: (busId: string) => void;
-  onTrack?: (busId: string) => void;
+  onTrack?: (busId: string, simulate?: boolean) => void;
   isTracking?: boolean;
 }
 
@@ -55,15 +65,44 @@ const BusListItem = ({ bus, onUpdateLocation, onEdit, onDelete, onTrack, isTrack
 
         <div className="flex items-center gap-2 lg:ml-4">
           {onTrack && (
-            <Button
-              variant={isTracking ? "destructive" : "outline"}
-              size="sm"
-              onClick={() => onTrack(bus.id)}
-              className={isTracking ? "animate-pulse" : ""}
-            >
-              <Navigation className="w-4 h-4" />
-              {isTracking ? "Stop tracking" : "Start Tracking"}
-            </Button>
+            isTracking ? (
+              <Button
+                variant="destructive"
+                size="sm"
+                onClick={() => onTrack(bus.id)}
+                className="animate-pulse h-9 px-4 rounded-xl"
+              >
+                <Square className="w-4 h-4 mr-2 fill-current" />
+                Stop Tracking
+              </Button>
+            ) : (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="sm" className="h-9 px-4 rounded-xl border-primary/20 hover:border-primary/50">
+                    <Navigation className="w-4 h-4 mr-2 text-primary" />
+                    Start Tracking
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56 rounded-xl p-2">
+                  <DropdownMenuLabel>Tracking Mode</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={() => onTrack(bus.id, false)} className="gap-3 p-3 rounded-lg cursor-pointer">
+                    <Satellite className="w-4 h-4 text-primary" />
+                    <div className="flex flex-col">
+                      <span className="font-bold">Live GPS Sensor</span>
+                      <span className="text-[10px] text-muted-foreground">Uses real device hardware</span>
+                    </div>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => onTrack(bus.id, true)} className="gap-3 p-3 rounded-lg cursor-pointer">
+                    <Cpu className="w-4 h-4 text-accent" />
+                    <div className="flex flex-col">
+                      <span className="font-bold">Cloud Simulator</span>
+                      <span className="text-[10px] text-muted-foreground">For testing without GPS</span>
+                    </div>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )
           )}
           <Button
             variant="ghost"

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Layout } from "@/components/layout";
-import { User, Mail, Calendar, Settings, Phone, MapPin, Save, X, Shield, Bell, Key, LogOut, ChevronRight, Activity, Bus, AlertCircle } from "lucide-react";
+import { User, Mail, Calendar, Settings, Phone, MapPin, Save, X, Shield, Bell, Key, LogOut, ChevronRight, Activity, Bus, AlertCircle, type LucideIcon } from "lucide-react";
 import { authService } from "@/services/authService";
 import type { User as UserType } from "@/types";
 import { Button } from "@/components/ui/button";
@@ -11,6 +11,27 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { userProfileSchema, type UserProfileFormData } from "@/lib/validations/auth";
 import { cn } from "@/lib/utils";
+import { safeFormat } from "@/lib/date-utils";
+
+const OptionRow = ({ icon: Icon, label, badge, border = true }: { icon: LucideIcon | React.ElementType, label: string, badge?: string, border?: boolean }) => (
+    <div className={cn(
+        "flex items-center justify-between py-4 group cursor-pointer transition-all hover:px-2 hover:bg-slate-50 dark:hover:bg-slate-900 rounded-2xl",
+        border && "border-b border-slate-100 dark:border-slate-800"
+    )}>
+        <div className="flex items-center gap-4 text-left">
+            <div className="p-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-500 group-hover:bg-primary group-hover:text-white transition-all shadow-sm">
+                <Icon className="w-4.5 h-4.5" />
+            </div>
+            <span className="text-sm font-semibold text-slate-700 dark:text-slate-300 group-hover:text-slate-900 dark:group-hover:text-white">{label}</span>
+        </div>
+        <div className="flex items-center gap-2">
+            {badge && (
+                <span className="px-2 py-0.5 rounded-full bg-primary/10 text-primary text-[10px] font-black uppercase tracking-wider">{badge}</span>
+            )}
+            <ChevronRight className="w-4 h-4 text-slate-300 group-hover:text-primary group-hover:translate-x-0.5 transition-all" />
+        </div>
+    </div>
+);
 
 const UserProfile = () => {
     const [user, setUser] = useState<UserType | null>(null);
@@ -98,13 +119,14 @@ const UserProfile = () => {
         <Layout>
             <div className="max-w-md mx-auto min-h-screen bg-gray-50 dark:bg-gray-900 pb-20">
                 {/* --- Top Section: Gradient Header --- */}
+                <form onSubmit={handleSubmit(onSave)} className="w-full">
                 <div className="relative pt-12 pb-24 px-6 rounded-b-[40px] shadow-lg overflow-hidden flex flex-col items-center">
                     {/* Gradient Background */}
                     <div className="absolute inset-0 bg-gradient-buzzo opacity-90"></div>
                     {/* Decorative pattern/blur overlay */}
                     <div className="absolute top-0 w-full h-full bg-slate-900/10 backdrop-blur-[2px]"></div>
 
-                    <form onSubmit={handleSubmit(onSave)} className="relative z-10 w-full flex flex-col items-center">
+                    <div className="relative z-10 w-full flex flex-col items-center">
                         {/* Avatar */}
                         <div className="relative mb-4">
                             <div className="p-1 bg-white dark:bg-gray-800 rounded-full shadow-xl">
@@ -137,11 +159,14 @@ const UserProfile = () => {
                             
                             {/* Role Badge */}
                             <div className="inline-flex items-center px-4 py-1.5 rounded-full bg-white/20 backdrop-blur-md border border-white/30 text-white text-sm font-medium tracking-wide shadow-sm">
-                                <span className="mr-1.5 w-2 h-2 rounded-full bg-blue-400 animate-pulse"></span>
-                                Passenger Account
+                                <span className={cn(
+                                    "mr-1.5 w-2 h-2 rounded-full animate-pulse",
+                                    user.role === 'admin' ? "bg-red-400" : user.role === 'driver' ? "bg-amber-400" : "bg-blue-400"
+                                )}></span>
+                                {user.role.charAt(0).toUpperCase() + user.role.slice(1)} Account
                             </div>
                         </div>
-                    </form>
+                    </div>
                 </div>
 
                 {/* --- Middle Section: Stats & Info --- */}
@@ -160,7 +185,7 @@ const UserProfile = () => {
                         ))}
                     </div>
 
-                    <form id="profile-details-form" onSubmit={handleSubmit(onSave)}>
+                    <div id="profile-details-info">
                         {/* Information List List */}
                         <div className="bg-white dark:bg-gray-800 rounded-3xl p-5 shadow-soft border border-gray-100 dark:border-gray-700 space-y-5">
                             <h3 className="text-sm font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-2">Profile Details</h3>
@@ -229,7 +254,7 @@ const UserProfile = () => {
                                 <div className="flex-1 pb-2">
                                     <p className="text-xs text-muted-foreground font-medium mb-0.5">Member Since</p>
                                     <p className="font-semibold text-gray-900 dark:text-gray-100">
-                                        {user.createdAt ? new Date(user.createdAt).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' }) : 'Recently'}
+                                        {safeFormat(user.createdAt, 'MMMM do, yyyy', 'Recently Joined')}
                                     </p>
                                 </div>
                             </div>
@@ -258,7 +283,7 @@ const UserProfile = () => {
                                 </Button>
                             </div>
                         )}
-                    </form>
+                    </div>
 
                     {/* --- Bottom Section: Settings & Actions (If NOT editing) --- */}
                     {!isEditing && (
@@ -295,31 +320,10 @@ const UserProfile = () => {
                         </>
                     )}
                 </div>
+                </form>
             </div>
         </Layout>
     );
 };
-
-import { type LucideIcon } from "lucide-react";
-
-// Helper component for settings rows
-const OptionRow = ({ icon: Icon, label, badge, border = true }: { icon: LucideIcon | React.ElementType, label: string, badge?: string, border?: boolean }) => (
-    <button type="button" className={cn("w-full flex items-center justify-between p-4 group hover:bg-gray-50 dark:hover:bg-gray-900/50 rounded-2xl transition-all", border && "border-b border-gray-50 dark:border-gray-800")}>
-        <div className="flex items-center gap-4 text-left">
-            <div className="p-2.5 bg-gray-100 dark:bg-gray-900 rounded-xl text-gray-500 group-hover:text-primary transition-colors">
-                <Icon size={18} />
-            </div>
-            <span className="font-semibold text-gray-800 dark:text-gray-200">{label}</span>
-        </div>
-        <div className="flex items-center gap-3">
-            {badge && (
-                <span className="px-2.5 py-0.5 rounded-full bg-primary text-white text-xs font-bold leading-tight">
-                    {badge}
-                </span>
-            )}
-            <ChevronRight className="w-5 h-5 text-gray-300 dark:text-gray-600 group-hover:text-primary transition-colors" />
-        </div>
-    </button>
-);
 
 export default UserProfile;

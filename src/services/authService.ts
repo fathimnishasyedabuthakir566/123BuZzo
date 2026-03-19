@@ -115,9 +115,9 @@ export const authService = {
       const user: User = {
         _id: data._id,
         id: data._id,
-        name: data.name,
-        email: data.email,
-        role: data.role,
+        name: data.name || 'Buzzo User',
+        email: data.email || 'No email provided',
+        role: (data.role || 'user').toLowerCase() as UserRole,
         phone: data.phone,
         city: data.city,
         profilePhoto: data.profilePhoto,
@@ -182,9 +182,19 @@ export const authService = {
 
   // Get current user (from local storage)
   async getCurrentUser(): Promise<User | null> {
-    const userStr = localStorage.getItem('user');
-    if (userStr) {
-      return JSON.parse(userStr);
+    try {
+      const userStr = localStorage.getItem('user');
+      if (userStr) {
+        const user = JSON.parse(userStr);
+        if (user) {
+          // Normalize role to lowercase for application-wide consistency
+          user.role = (user.role || 'user').toLowerCase() as UserRole;
+          return user;
+        }
+      }
+    } catch (error) {
+      console.error("Error parsing user from localStorage:", error);
+      localStorage.removeItem('user');
     }
     return null;
   },
@@ -210,7 +220,7 @@ export const authService = {
         id: data._id,
         name: data.name,
         email: data.email,
-        role: data.role,
+        role: (data.role || 'user').toLowerCase() as UserRole,
         phone: data.phone,
         city: data.city,
         profilePhoto: data.profilePhoto,

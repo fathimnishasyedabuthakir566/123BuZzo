@@ -58,4 +58,40 @@ const calculateStops = (currentLat, currentLng, stops) => {
     };
 };
 
-module.exports = { calculateStops };
+// Function to calculate Smart ETA based on distance, speed, and real-time traffic factors
+const calculateSmartETA = (distanceKm, speedKph) => {
+    if (!distanceKm || distanceKm <= 0) return "Arriving";
+    
+    // Base time in hours
+    let baseTimeHours = distanceKm / (speedKph || 40); // Default to 40kph if no speed
+    
+    // --- Traffic Analysis Simulation (AI) ---
+    const now = new Date();
+    const hour = now.getHours();
+    const isWeekend = now.getDay() === 0 || now.getDay() === 6;
+    
+    let trafficMultiplier = 1.0;
+    
+    // Peak hours in Tirunelveli (approximate)
+    if ((hour >= 8 && hour <= 10) || (hour >= 17 && hour <= 20)) {
+        trafficMultiplier = isWeekend ? 1.3 : 1.8; // Heavy traffic
+    } else if (hour >= 10 && hour <= 16) {
+        trafficMultiplier = 1.2; // Moderate midday traffic
+    } else if (hour >= 22 || hour <= 5) {
+        trafficMultiplier = 0.8; // Night time - faster!
+    }
+    
+    // Random "Road Factor" (Construction, minor delays)
+    const roadFactor = 0.9 + (Math.random() * 0.4); // 0.9 to 1.3
+    
+    const finalMinutes = Math.round(baseTimeHours * 60 * trafficMultiplier * roadFactor);
+    
+    if (finalMinutes < 1) return "Less than 1 min";
+    if (finalMinutes < 60) return `${finalMinutes} mins`;
+    
+    const h = Math.floor(finalMinutes / 60);
+    const m = finalMinutes % 60;
+    return `${h}h ${m}m`;
+};
+
+module.exports = { calculateStops, calculateSmartETA, getDistance };

@@ -3,7 +3,7 @@ import { Layout } from '@/components/layout';
 import AllBusesMap from '@/components/map/AllBusesMap';
 import { busService } from '@/services/busService';
 import type { Bus } from '@/types';
-import { Radar, Navigation, List, Filter, Search, Map as MapIcon, Info, Users, Clock, Bus as BusIcon } from 'lucide-react';
+import { Radar, Navigation, List, Filter, Search, Map as MapIcon, Info, Users, Clock, Bus as BusIcon, Activity, Zap, ShieldAlert, Cpu, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { socketService } from '@/services/socketService';
@@ -28,7 +28,6 @@ const LiveRadar = () => {
         };
         fetchBuses();
 
-        // Join socket for real-time updates
         socketService.connect();
         
         socketService.on('receive-location', (data: any) => {
@@ -52,7 +51,7 @@ const LiveRadar = () => {
             }));
         });
 
-        const interval = setInterval(fetchBuses, 60000); // Slower polling as backup
+        const interval = setInterval(fetchBuses, 60000);
         return () => {
             clearInterval(interval);
             socketService.off('receive-location');
@@ -71,36 +70,43 @@ const LiveRadar = () => {
 
     return (
         <Layout>
-            <div className="h-[calc(100vh-80px)] overflow-hidden flex flex-col md:flex-row bg-slate-50">
-                {/* Sidebar */}
-                <div className="w-full md:w-[400px] h-1/2 md:h-full bg-white border-r border-slate-200 flex flex-col shadow-xl z-10">
-                    <div className="p-6 border-b border-slate-100">
-                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-[10px] font-black uppercase tracking-widest border border-primary/20 mb-4">
-                            <Radar className="w-3 h-3 animate-pulse" /> Live Terminal Radar
+            <div className="h-[calc(100vh-80px)] overflow-hidden flex flex-col md:flex-row mesh-bg">
+                {/* Tactical Sidebar */}
+                <div className="w-full md:w-[450px] h-1/2 md:h-full glass-premium border-r border-white/5 flex flex-col shadow-2xl z-20 backdrop-blur-2xl">
+                    <div className="p-10 border-b border-white/5 bg-slate-900/40">
+                        <div className="flex justify-between items-start mb-8">
+                            <div>
+                                <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-teal-500/10 text-teal-400 text-[10px] font-black uppercase tracking-[0.2em] border border-teal-500/20 mb-4 backdrop-blur-md">
+                                    <Radar className="w-3 h-3 animate-pulse" /> Neural Command
+                                </div>
+                                <h1 className="text-3xl font-black text-white tracking-tighter italic uppercase leading-none">Radar Feed</h1>
+                            </div>
+                            <div className="w-12 h-12 rounded-2xl bg-slate-900 flex items-center justify-center border border-white/5">
+                                <Cpu className="w-6 h-6 text-teal-500 animate-pulse" />
+                            </div>
                         </div>
-                        <h1 className="text-2xl font-black text-slate-800 tracking-tight mb-4 text-gradient">Track All Buses</h1>
                         
-                        <div className="relative mb-6">
-                            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                        <div className="relative mb-8 group">
+                            <Search className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500 group-focus-within:text-teal-400 transition-colors" />
                             <input 
                                 type="text"
-                                placeholder="Search bus number or route..."
-                                className="w-full h-12 pl-12 pr-4 rounded-2xl bg-slate-50 border border-slate-200 text-sm font-medium focus:ring-2 focus:ring-primary/30 outline-none transition-all"
+                                placeholder="IDENTIFY UNIT OR NODE..."
+                                className="w-full h-16 pl-14 pr-6 rounded-2xl bg-white/5 border border-white/10 text-sm font-black text-white placeholder:text-slate-600 focus:border-teal-500/50 outline-none transition-all tracking-widest uppercase"
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
                             />
                         </div>
 
-                        <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-xl">
+                        <div className="flex items-center gap-2 p-1.5 bg-black/20 rounded-2xl border border-white/5">
                             {(['all', 'active', 'delayed'] as const).map((tab) => (
                                 <button
                                     key={tab}
                                     onClick={() => setActiveTab(tab)}
                                     className={cn(
-                                        "flex-1 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all",
+                                        "flex-1 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all",
                                         activeTab === tab 
-                                            ? "bg-white text-slate-800 shadow-sm" 
-                                            : "text-slate-400 hover:text-slate-600"
+                                            ? "bg-teal-500 text-white shadow-glow" 
+                                            : "text-slate-500 hover:text-slate-300"
                                     )}
                                 >
                                     {tab}
@@ -109,57 +115,62 @@ const LiveRadar = () => {
                         </div>
                     </div>
 
-                    <div className="flex-1 overflow-y-auto custom-scrollbar">
+                    <div className="flex-1 overflow-y-auto no-scrollbar">
                         {isLoading ? (
-                            <div className="p-6 space-y-4">
-                                {[1,2,3,4,5].map(i => <div key={i} className="h-24 bg-slate-100 rounded-2xl skeleton" />)}
+                            <div className="p-10 space-y-6">
+                                {[1,2,3,4].map(i => <div key={i} className="h-32 bg-white/5 animate-pulse rounded-[2.5rem] border border-white/5" />)}
                             </div>
                         ) : filteredBuses.length === 0 ? (
-                            <div className="p-12 text-center">
-                                <Search className="w-12 h-12 text-slate-200 mx-auto mb-4" />
-                                <p className="text-slate-400 font-bold">No buses found</p>
+                            <div className="p-20 text-center">
+                                <Search className="w-16 h-16 text-slate-800 mx-auto mb-6 opacity-20" />
+                                <p className="text-slate-500 font-black uppercase tracking-widest text-xs">No Signal Detected</p>
                             </div>
                         ) : (
-                            <div className="divide-y divide-slate-50">
+                            <div className="p-6 space-y-4">
                                 {filteredBuses.map(bus => (
                                     <div 
                                         key={bus.id}
                                         onClick={() => setSelectedBus(bus)}
                                         className={cn(
-                                            "p-5 hover:bg-slate-50 cursor-pointer transition-all border-l-4",
-                                            selectedBus?.id === bus.id ? "border-primary bg-primary/5" : "border-transparent"
+                                            "p-8 rounded-[2.5rem] cursor-pointer transition-all border-2 group",
+                                            selectedBus?.id === bus.id 
+                                                ? "bg-teal-500/10 border-teal-500/50 shadow-glow" 
+                                                : "bg-white/5 border-white/5 hover:bg-white/10 hover:border-white/10"
                                         )}
                                     >
-                                        <div className="flex items-center justify-between mb-2">
-                                            <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-slate-100 text-slate-500 uppercase tracking-wider">
-                                                {bus.busNumber}
+                                        <div className="flex items-center justify-between mb-4">
+                                            <span className="text-[10px] font-black px-3 py-1 rounded-lg bg-slate-900 text-teal-400 uppercase tracking-widest border border-teal-500/20">
+                                                ID: {bus.busNumber}
                                             </span>
                                             <div className="flex items-center gap-2">
                                                 {bus.isActive ? (
-                                                    <span className="flex items-center gap-1 text-[10px] font-bold text-emerald-500">
-                                                        <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" /> LIVE
+                                                    <span className="flex items-center gap-1.5 text-[10px] font-black text-emerald-500 uppercase tracking-widest">
+                                                        <div className="w-2 h-2 rounded-full bg-emerald-500 animate-neon-pulse" /> Telemetry Locked
                                                     </span>
                                                 ) : (
-                                                    <span className="text-[10px] font-bold text-slate-400">OFFLINE</span>
+                                                    <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Signal Lost</span>
                                                 )}
                                             </div>
                                         </div>
-                                        <h3 className="font-bold text-slate-800 leading-tight mb-1">{bus.name}</h3>
-                                        <p className="text-xs text-slate-400">{bus.routeFrom} → {bus.routeTo}</p>
+                                        <h3 className="text-xl font-black text-white tracking-tighter flex items-center gap-3 uppercase mb-1">
+                                            {bus.name}
+                                            {bus.status === 'delayed' && <ShieldAlert className="w-5 h-5 text-amber-500" />}
+                                        </h3>
+                                        <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{bus.routeFrom} <ArrowRight className="w-3 h-3 inline mx-1" /> {bus.routeTo}</p>
                                         
                                         {bus.location && bus.isActive && (
-                                            <div className="mt-4 grid grid-cols-3 gap-2">
-                                                <div className="bg-white rounded-lg p-2 border border-slate-100 flex flex-col items-center">
-                                                    <Navigation className="w-3 h-3 text-primary mb-1" />
-                                                    <span className="text-[9px] font-black text-slate-800 uppercase">{bus.speed || 0} km/h</span>
+                                            <div className="mt-8 grid grid-cols-3 gap-3">
+                                                <div className="bg-slate-900/50 rounded-2xl p-3 border border-white/5 flex flex-col items-center">
+                                                    <Zap className="w-4 h-4 text-teal-400 mb-1" />
+                                                    <span className="text-[10px] font-black text-white uppercase">{bus.speed || 0} km/h</span>
                                                 </div>
-                                                <div className="bg-white rounded-lg p-2 border border-slate-100 flex flex-col items-center">
-                                                    <Clock className="w-3 h-3 text-amber-500 mb-1" />
-                                                    <span className="text-[9px] font-black text-slate-800 uppercase">{bus.eta || 'Calculating'}</span>
+                                                <div className="bg-slate-900/50 rounded-2xl p-3 border border-white/5 flex flex-col items-center">
+                                                    <Clock className="w-4 h-4 text-amber-500 mb-1" />
+                                                    <span className="text-[10px] font-black text-white uppercase">{bus.eta || 'LIVE'}</span>
                                                 </div>
-                                                <div className="bg-white rounded-lg p-2 border border-slate-100 flex flex-col items-center">
-                                                    <Users className="w-3 h-3 text-emerald-500 mb-1" />
-                                                    <span className="text-[9px] font-black text-slate-800 uppercase">{bus.crowdLevel || 'Low'}</span>
+                                                <div className="bg-slate-900/50 rounded-2xl p-3 border border-white/5 flex flex-col items-center">
+                                                    <Users className="w-4 h-4 text-emerald-500 mb-1" />
+                                                    <span className="text-[10px] font-black text-white uppercase">{bus.crowdLevel || 'OPT'}</span>
                                                 </div>
                                             </div>
                                         )}
@@ -170,38 +181,46 @@ const LiveRadar = () => {
                     </div>
                 </div>
 
-                {/* Map Area */}
+                {/* Command Map Area */}
                 <div className="flex-1 relative h-1/2 md:h-full">
                     <AllBusesMap initialBuses={buses} />
                     
-                    {/* Floating Map Controls */}
-                    <div className="absolute top-6 right-6 z-[1000] flex flex-col gap-2">
-                        <button className="w-12 h-12 rounded-2xl bg-white shadow-xl flex items-center justify-center text-slate-600 hover:text-primary transition-all">
-                            <MapIcon className="w-5 h-5" />
+                    {/* Futuristic HUD Overlays */}
+                    <div className="absolute inset-0 pointer-events-none border-[20px] border-slate-900/20">
+                         <div className="absolute top-0 left-0 w-32 h-32 border-l-4 border-t-4 border-teal-500/30 rounded-tl-[3rem]" />
+                         <div className="absolute top-0 right-0 w-32 h-32 border-r-4 border-t-4 border-teal-500/30 rounded-tr-[3rem]" />
+                         <div className="absolute bottom-0 left-0 w-32 h-32 border-l-4 border-b-4 border-teal-500/30 rounded-bl-[3rem]" />
+                         <div className="absolute bottom-0 right-0 w-32 h-32 border-r-4 border-b-4 border-teal-500/30 rounded-br-[3rem]" />
+                    </div>
+
+                    <div className="absolute top-10 right-10 z-[1000] flex flex-col gap-4">
+                        <button className="w-16 h-16 rounded-2xl bg-slate-900 text-teal-400 flex items-center justify-center border border-white/10 hover:bg-teal-500 hover:text-white transition-all pointer-events-auto shadow-glow">
+                            <Navigation className="w-6 h-6" />
                         </button>
-                        <button className="w-12 h-12 rounded-2xl bg-white shadow-xl flex items-center justify-center text-slate-600 hover:text-primary transition-all">
-                            <Filter className="w-5 h-5" />
+                        <button className="w-16 h-16 rounded-2xl bg-slate-900 text-white shadow-2xl flex items-center justify-center border border-white/10 hover:bg-white/20 transition-all pointer-events-auto">
+                            <Filter className="w-6 h-6" />
                         </button>
                     </div>
 
-                    {/* Stats overlay */}
-                    <div className="absolute bottom-6 left-6 z-[1000] flex gap-4">
-                        <div className="bg-white/90 backdrop-blur-md rounded-2xl p-4 shadow-2xl border border-white/50 flex items-center gap-4">
-                            <div className="w-10 h-10 rounded-xl bg-emerald-500 text-white flex items-center justify-center shadow-lg shadow-emerald-500/20">
-                                <BusIcon className="w-5 h-5" />
+                    {/* Telemetry HUD */}
+                    <div className="absolute bottom-10 left-10 z-[1000] flex gap-6 pointer-events-auto">
+                        <div className="glass-premium rounded-[2.5rem] p-6 pr-10 border-white/10 flex items-center gap-6 shadow-2xl animate-float-slow">
+                            <div className="w-16 h-16 rounded-3xl bg-teal-500 text-white flex items-center justify-center shadow-glow">
+                                <Activity className="w-8 h-8" />
                             </div>
                             <div>
-                                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Active Buses</p>
-                                <p className="text-xl font-black text-slate-800 tracking-tighter leading-none">{buses.filter(b => b.isActive).length}</p>
+                                <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.3em] mb-1 leading-none">Global Active Fleet</p>
+                                <p className="text-4xl font-black text-white tracking-tighter leading-none">{buses.filter(b => b.isActive).length}<span className="text-teal-500 text-lg"> units</span></p>
                             </div>
                         </div>
-                        <div className="bg-white/90 backdrop-blur-md rounded-2xl p-4 shadow-2xl border border-white/50 flex items-center gap-4">
-                            <div className="w-10 h-10 rounded-xl bg-amber-500 text-white flex items-center justify-center shadow-lg shadow-amber-500/20">
-                                <Clock className="w-5 h-5" />
+                        
+                        <div className="glass-premium rounded-[2.5rem] p-6 pr-10 border-white/10 flex items-center gap-6 shadow-2xl animate-float">
+                            <div className="w-16 h-16 rounded-3xl bg-amber-500 text-white flex items-center justify-center shadow-[0_10px_30px_rgba(245,158,11,0.3)]">
+                                <ShieldAlert className="w-8 h-8" />
                             </div>
                             <div>
-                                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Delayed</p>
-                                <p className="text-xl font-black text-slate-800 tracking-tighter leading-none">{buses.filter(b => b.status === 'delayed').length}</p>
+                                <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.3em] mb-1 leading-none">Corridor Deviations</p>
+                                <p className="text-4xl font-black text-white tracking-tighter leading-none">{buses.filter(b => b.status === 'delayed').length}<span className="text-amber-500 text-lg"> alerts</span></p>
                             </div>
                         </div>
                     </div>
@@ -212,3 +231,4 @@ const LiveRadar = () => {
 };
 
 export default LiveRadar;
+

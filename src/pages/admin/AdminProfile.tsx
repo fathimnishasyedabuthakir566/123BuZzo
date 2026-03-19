@@ -128,6 +128,10 @@ const AdminProfile = () => {
                         {isEditing ? (
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-8 bg-slate-800/50 p-6 rounded-2xl border border-slate-700">
                                 <div>
+                                    <label className="text-xs font-bold text-slate-400 uppercase">Full Name</label>
+                                    <input type="text" className="w-full mt-1 p-3 rounded-xl bg-slate-900 border border-slate-600 focus:border-primary text-white outline-none" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} />
+                                </div>
+                                <div>
                                     <label className="text-xs font-bold text-slate-400 uppercase">Phone Number</label>
                                     <input type="text" className="w-full mt-1 p-3 rounded-xl bg-slate-900 border border-slate-600 focus:border-primary text-white outline-none" value={formData.phone} onChange={e => setFormData({...formData, phone: e.target.value})} />
                                 </div>
