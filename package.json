@@ -1,6 +1,7 @@
 {
   "name": "vite_react_shadcn_ts",
   "private": true,
+  "type": "module",
   "version": "1.0.0",
   "description": "Buzzo Desktop App",
   "author": "Fathim Nisha",
