@@ -6,12 +6,12 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { authService } from "@/services/authService";
 import { busService } from "@/services/busService";
-import type { Bus as BusType } from "@/types";
+import type { Bus as BusType, User } from "@/types";
 import DigitalPass from "@/components/passenger/DigitalPass";
 import { cn } from "@/lib/utils";
 
 const PassengerDashboard = () => {
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [recentBuses, setRecentBuses] = useState<BusType[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'activity' | 'pass'>('activity');
@@ -278,7 +278,7 @@ const PassengerDashboard = () => {
                     <h4 className="font-bold mb-4 border-b border-white/5 pb-2 text-white">Recent Synchronization Log</h4>
                     <div className="max-h-60 overflow-y-auto space-y-3 pr-2 custom-scrollbar">
                       {user.loginHistory && user.loginHistory.length > 0 ? (
-                        user.loginHistory.slice().reverse().map((hist: any, i: number) => (
+                        user.loginHistory.slice().reverse().map((hist, i) => (
                           <div key={i} className="flex justify-between items-center p-4 border border-white/5 rounded-xl text-sm bg-black/20 hover:border-white/10 transition-colors">
                             <div>
                               <p className="font-bold text-slate-300">{new Date(hist.timestamp).toLocaleString()}</p>

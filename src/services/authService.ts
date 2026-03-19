@@ -37,6 +37,7 @@ export interface UserActivity {
   isBlocked?: boolean;
   loginHistory?: Array<{ ip: string; device: string; timestamp: string }>;
   createdAt?: string;
+  assignedBus?: string;
 }
 
 interface BackendUser {

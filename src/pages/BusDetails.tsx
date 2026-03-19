@@ -71,7 +71,7 @@ const BusDetails = () => {
     radiusKm: 1.0
   });
 
-  const fetchBus = async () => {
+  const fetchBus = useCallback(async () => {
     if (!id) return;
     setLoading(true);
     const data = await busService.getBusById(id);
@@ -82,7 +82,7 @@ const BusDetails = () => {
       }
     }
     setLoading(false);
-  };
+  }, [id]);
 
   useEffect(() => {
     fetchBus();
@@ -125,7 +125,7 @@ const BusDetails = () => {
       socketService.unsubscribeFromLocation();
       socketService.disconnect();
     };
-  }, [id]);
+  }, [id, fetchBus]);
 
   const matchesStatus = useMemo(() => {
     if (!bus) return null;
@@ -156,7 +156,7 @@ const BusDetails = () => {
     }
 
     return { isOffline, smartStatus, statusColor, statusBg };
-  }, [bus, lastSeen]);
+  }, [bus]);
 
   useEffect(() => {
     if (userLocation && bus?.intermediateStops) {

@@ -188,8 +188,8 @@ const AdminDashboard = () => {
     }
   };
 
-  const handleCreateBus = async (data: any) => {
-    const success = await busService.createBus(data as any);
+  const handleCreateBus = async (data: Partial<Bus>) => {
+    const success = await busService.createBus(data as Omit<Bus, 'id' | 'location'> & Partial<Bus>);
     if (success) {
       toast.success("Bus created successfully");
       setShowAddBus(false);

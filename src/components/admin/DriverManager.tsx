@@ -32,7 +32,7 @@ export const DriverManager = () => {
     }, []);
 
     const handleAssignBus = async (driverId: string, busId: string) => {
-        const success = await authService.updateUserProfile({ id: driverId, assignedBus: busId } as any);
+        const success = await authService.updateUserProfile({ id: driverId, assignedBus: busId } as Partial<User>);
         if (success.success) {
             toast.success("Driver assigned to bus");
             fetchData();
@@ -91,7 +91,7 @@ export const DriverManager = () => {
                                 <p className="text-[10px] text-muted-foreground uppercase font-bold mb-1">Current Assignment</p>
                                 <div className="flex items-center gap-2 text-sm font-bold text-primary">
                                     <BusIcon className="w-3 h-3" />
-                                    {buses.find(b => b.id === (driver as any).assignedBus)?.busNumber || 'UNASSIGNED'}
+                                    {buses.find(b => b.id === driver.assignedBus)?.busNumber || 'UNASSIGNED'}
                                 </div>
                             </div>
                         </div>
@@ -100,7 +100,7 @@ export const DriverManager = () => {
                             <label className="text-[10px] text-muted-foreground uppercase font-bold px-1">Quick Assign Bus</label>
                             <select
                                 className="w-full h-12 px-4 rounded-xl bg-background border border-primary/10 focus:ring-2 focus:ring-primary appearance-none cursor-pointer text-sm font-semibold"
-                                value={(driver as any).assignedBus || ""}
+                                value={driver.assignedBus || ""}
                                 onChange={(e) => handleAssignBus(driver._id, e.target.value)}
                             >
                                 <option value="" disabled>Select Bus to Assign</option>

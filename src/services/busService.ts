@@ -188,7 +188,9 @@ export const busService = {
           const { data } = JSON.parse(stored);
           console.log('Returning stale session data as emergency fallback');
           return data;
-        } catch (e) {}
+        } catch (e) {
+          console.warn("Failed to parse session cache:", e);
+        }
       }
 
       // Final fallback to MOCK DATA if it's the first page

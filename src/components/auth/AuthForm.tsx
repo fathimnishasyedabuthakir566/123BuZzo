@@ -3,7 +3,7 @@ import { Mail, Lock, User, Eye, EyeOff, ArrowRight, Phone, MapPin } from "lucide
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import type { UserRole } from "@/types";
-import { useForm } from "react-hook-form";
+import { useForm, type UseFormRegister, type FieldErrors } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { GoogleLogin } from "@react-oauth/google";
 import { authService } from "@/services/authService";
@@ -26,7 +26,7 @@ interface FloatingInputProps {
   icon: React.ElementType;
   id: string;
   type?: string;
-  register: any; // react-hook-form register
+  register: UseFormRegister<RegisterFormData | LoginFormData>;
   error?: { message?: string };
   showPasswordToggle?: boolean;
   showPassword?: boolean;
@@ -120,7 +120,7 @@ const AuthForm = ({ mode, role, onSubmit, onModeChange, isLoading }: AuthFormPro
               icon={User} 
               id="name" 
               register={register} 
-              error={(errors as any).name} 
+              error={(errors as FieldErrors<RegisterFormData>).name} 
             />
             <div className="flex gap-4">
               <div className="flex-1">
@@ -129,7 +129,7 @@ const AuthForm = ({ mode, role, onSubmit, onModeChange, isLoading }: AuthFormPro
                   icon={Phone} 
                   id="phone" 
                   register={register} 
-                  error={(errors as any).phone} 
+                  error={(errors as FieldErrors<RegisterFormData>).phone} 
                 />
               </div>
               <div className="flex-1">
@@ -138,7 +138,7 @@ const AuthForm = ({ mode, role, onSubmit, onModeChange, isLoading }: AuthFormPro
                   icon={MapPin} 
                   id="city" 
                   register={register} 
-                  error={(errors as any).city} 
+                  error={(errors as FieldErrors<RegisterFormData>).city} 
                 />
               </div>
             </div>
@@ -173,7 +173,7 @@ const AuthForm = ({ mode, role, onSubmit, onModeChange, isLoading }: AuthFormPro
             id="confirmPassword" 
             type={showPassword ? "text" : "password"} 
             register={register} 
-            error={(errors as any).confirmPassword} 
+            error={(errors as FieldErrors<RegisterFormData>).confirmPassword} 
           />
         )}
 

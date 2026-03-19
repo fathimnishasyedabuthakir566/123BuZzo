@@ -1,0 +1,38 @@
+﻿
+> vite_react_shadcn_ts@1.0.0 lint
+> eslint .
+
+node.exe : (node:4836) [MODULE
+_TYPELESS_PACKAGE_JSON] 
+Warning: Module type of file:/
+//C:/Users/Fathim%20Nisha/OneD
+rive/Desktop/123BuZzo/123BuZzo
+/eslint.config.js?mtime=177392
+4733798 is not specified and 
+it doesn't parse as CommonJS.
+At C:\Program 
+Files\nodejs\npm.ps1:29 char:3
++   & $NODE_EXE $NPM_CLI_JS 
+$args
++   
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : 
+    NotSpecified: ((node:483  
+  6) [MO...se as CommonJS.:   
+ String) [], RemoteExcepti    
+on
+    + FullyQualifiedErrorId : 
+    NativeCommandError
+ 
+Reparsing as ES module 
+because module syntax was 
+detected. This incurs a 
+performance overhead.
+To eliminate this warning, 
+add "type": "module" to 
+C:\Users\Fathim Nisha\OneDrive
+\Desktop\123BuZzo\123BuZzo\pac
+kage.json.
+(Use `node --trace-warnings 
+...` to show where the 
+warning was created)

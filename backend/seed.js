@@ -1,8 +1,9 @@
 const mongoose = require('mongoose');
 const dotenv = require('dotenv');
+const path = require('path');
 const Bus = require('./models/busModel');
 
-dotenv.config();
+dotenv.config({ path: path.join(__dirname, '.env') });
 
 // ============================================================
 //  TIRUNELVELI OMNI BUS STAND — COMPLETE SEED DATA

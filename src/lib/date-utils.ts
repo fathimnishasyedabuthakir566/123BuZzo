@@ -3,7 +3,7 @@ import { format, isValid } from 'date-fns';
 /**
  * Safely formats a date or string, returning a fallback if invalid
  */
-export const safeFormat = (date: any, formatStr: string, fallback: string = 'N/A') => {
+export const safeFormat = (date: Date | string | number | null | undefined, formatStr: string, fallback: string = 'N/A') => {
   if (!date) return fallback;
   
   const dateObj = date instanceof Date ? date : new Date(date);

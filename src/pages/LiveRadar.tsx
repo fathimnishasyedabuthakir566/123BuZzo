@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Layout } from '@/components/layout';
 import AllBusesMap from '@/components/map/AllBusesMap';
 import { busService } from '@/services/busService';
-import type { Bus } from '@/types';
+import type { Bus, BusStatus } from '@/types';
 import { Radar, Navigation, List, Filter, Search, Map as MapIcon, Info, Users, Clock, Bus as BusIcon, Activity, Zap, ShieldAlert, Cpu, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -30,7 +30,19 @@ const LiveRadar = () => {
 
         socketService.connect();
         
-        socketService.on('receive-location', (data: any) => {
+        interface LocationPayload {
+            busId: string;
+            routeId: string;
+            lat: number;
+            lng: number;
+            speed?: number;
+            status?: BusStatus;
+            crowdLevel?: "low" | "medium" | "high" | "full";
+            isActive?: boolean;
+            lastUpdated: string;
+        }
+
+        socketService.on('receive-location', (data: LocationPayload) => {
             setBuses(prev => prev.map(bus => {
                 const busId = bus.id || bus._id;
                 if (busId === data.busId || busId === data.routeId) {

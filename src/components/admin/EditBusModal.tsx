@@ -62,7 +62,7 @@ const EditBusModal = ({ isOpen, bus, onClose, onSubmit }: EditBusModalProps) => 
                 order: index + 1
             }))
         };
-        await onSubmit(bus.id, formattedData as any);
+        await onSubmit(bus.id, formattedData as Partial<Bus>);
         onClose();
     };
 

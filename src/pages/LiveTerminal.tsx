@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Layout } from '@/components/layout';
 import { busService } from '@/services/busService';
 import { socketService } from '@/services/socketService';
-import type { Bus } from '@/types';
+import type { Bus, BusStatus } from '@/types';
 import { 
     Clock, 
     Bus as BusIcon, 
@@ -59,8 +59,22 @@ const LiveTerminal = () => {
         fetchBuses();
         fetchWeather();
         socketService.connect();
+        
+        interface LocationPayload {
+            busId: string;
+            routeId: string;
+            lat: number;
+            lng: number;
+            speed?: number;
+            status?: BusStatus;
+            crowdLevel?: "low" | "medium" | "high" | "full";
+            isActive?: boolean;
+            lastUpdated: string;
+            currentStop?: string;
+            nextStop?: string;
+        }
 
-        socketService.on('receive-location', (data: any) => {
+        socketService.on('receive-location', (data: LocationPayload) => {
             setBuses(prev => prev.map(bus => {
                 const busId = bus.id || bus._id;
                 if (busId === data.busId || busId === data.routeId) {

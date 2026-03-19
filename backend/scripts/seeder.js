@@ -3,7 +3,7 @@ const dotenv = require('dotenv');
 const path = require('path');
 const Bus = require('./models/busModel');
 
-dotenv.config({ path: path.join(__dirname, '.env') });
+dotenv.config({ path: path.join(__dirname, '..', '.env') });
 
 const createBus = (data) => ({
     name: data.name,

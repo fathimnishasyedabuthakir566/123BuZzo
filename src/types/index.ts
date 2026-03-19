@@ -93,6 +93,7 @@ export interface User {
   
   favoriteRoutes?: string[];
   department?: string;
+  loginHistory?: Array<{ ip: string; device: string; timestamp: string }>;
 }
 
 export interface AuthState {
