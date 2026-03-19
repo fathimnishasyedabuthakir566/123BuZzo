@@ -1,7 +1,7 @@
 import { io, Socket } from 'socket.io-client';
 import { toast } from "sonner";
 
-const URL = 'http://localhost:5001'; // Backend URL
+const URL = '/'; // Use relative path through proxy
 
 interface LocationData {
     routeId: string;

@@ -12,6 +12,8 @@ import Auth from "./pages/Auth";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminUsers from "./pages/admin/AdminUsers";
 import DriverDashboard from "./pages/driver/DriverDashboard";
+import Dashboard from "./pages/Dashboard";
+import Notifications from "./pages/Notifications";
 import PassengerDashboard from "./pages/passenger/PassengerDashboard";
 import UserProfile from "./pages/passenger/UserProfile";
 import DriverProfile from "./pages/driver/DriverProfile";
@@ -59,11 +61,13 @@ const App = () => {
                   <Route path="/live-radar" element={<LiveRadar />} />
                   <Route path="/live-terminal" element={<LiveTerminal />} />
 
-                  {/* Passenger Protected Routes */}
-                  <Route path="/dashboard" element={<ProtectedRoute allowedRoles={["user"]}><PassengerDashboard /></ProtectedRoute>} />
-                  <Route path="/profile" element={<ProtectedRoute allowedRoles={["user"]}><UserProfile /></ProtectedRoute>} />
-                  <Route path="/saved-routes" element={<ProtectedRoute allowedRoles={["user"]}><SavedRoutes /></ProtectedRoute>} />
-                  <Route path="/alerts" element={<ProtectedRoute allowedRoles={["user"]}><AlertsHub /></ProtectedRoute>} />
+                    {/* Unified Dashboard Protected Route */}
+                    {/* Notifications Page */}
+                    <Route path="/notifications" element={<ProtectedRoute allowedRoles={["user","driver","admin"]}><Notifications /></ProtectedRoute>} />
+                   <Route path="/dashboard" element={<ProtectedRoute allowedRoles={["user","driver","admin"]}><Dashboard /></ProtectedRoute>} />
+                   <Route path="/profile" element={<ProtectedRoute allowedRoles={["user"]}><UserProfile /></ProtectedRoute>} />
+                   <Route path="/saved-routes" element={<ProtectedRoute allowedRoles={["user"]}><SavedRoutes /></ProtectedRoute>} />
+                   <Route path="/alerts" element={<ProtectedRoute allowedRoles={["user"]}><AlertsHub /></ProtectedRoute>} />
 
                   {/* Driver Protected Routes */}
                   <Route path="/driver" element={<ProtectedRoute allowedRoles={["driver"]}><DriverDashboard /></ProtectedRoute>} />

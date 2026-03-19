@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
-import { Bell, X, Check, CheckCheck, Trash2, AlertTriangle, Bus, MapPin, MessageSquare, Info } from 'lucide-react';
+import { Bell, X, Check, CheckCheck, Trash2, AlertTriangle, Bus, MapPin, MessageSquare, Info, ExternalLink } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { notificationService, type Notification } from '@/services/notificationService';
 import { socketService } from '@/services/socketService';
 import { authService } from '@/services/authService';
@@ -199,6 +200,18 @@ const NotificationBell = () => {
                                 );
                             })
                         )}
+                    </div>
+
+                    {/* Footer */}
+                    <div className="px-5 py-3 border-t border-slate-100 bg-slate-50/50 flex items-center justify-center">
+                        <Link 
+                            to="/notifications" 
+                            onClick={() => setIsOpen(false)}
+                            className="text-[10px] font-black uppercase tracking-widest text-primary hover:text-teal-600 transition-colors flex items-center gap-2"
+                        >
+                            View All Notifications
+                            <ExternalLink className="w-3 h-3" />
+                        </Link>
                     </div>
                 </div>
             )}

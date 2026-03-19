@@ -12,6 +12,7 @@ import { cn } from "@/lib/utils";
 import { useTranslation } from "react-i18next";
 
 type AuthMode = "login" | "register";
+type AuthFormField = "name" | "email" | "phone" | "city" | "password" | "confirmPassword";
 
 interface AuthFormProps {
   mode: AuthMode;
@@ -24,9 +25,9 @@ interface AuthFormProps {
 interface FloatingInputProps {
   label: string;
   icon: React.ElementType;
-  id: string;
+  id: AuthFormField;
   type?: string;
-  register: UseFormRegister<RegisterFormData | LoginFormData>;
+  register: UseFormRegister<RegisterFormData>;
   error?: { message?: string };
   showPasswordToggle?: boolean;
   showPassword?: boolean;
@@ -85,7 +86,7 @@ const AuthForm = ({ mode, role, onSubmit, onModeChange, isLoading }: AuthFormPro
     handleSubmit,
     reset,
     formState: { errors },
-  } = useForm<RegisterFormData | LoginFormData>({
+  } = useForm<RegisterFormData>({
     resolver: zodResolver(schema),
     mode: "onBlur"
   });
@@ -95,7 +96,7 @@ const AuthForm = ({ mode, role, onSubmit, onModeChange, isLoading }: AuthFormPro
     reset();
   }, [mode, reset]);
 
-  const onFormSubmit = async (data: RegisterFormData | LoginFormData) => {
+  const onFormSubmit = async (data: RegisterFormData) => {
     await onSubmit(data);
   };
 
@@ -120,7 +121,7 @@ const AuthForm = ({ mode, role, onSubmit, onModeChange, isLoading }: AuthFormPro
               icon={User} 
               id="name" 
               register={register} 
-              error={(errors as FieldErrors<RegisterFormData>).name} 
+              error={errors.name} 
             />
             <div className="flex gap-4">
               <div className="flex-1">
@@ -129,7 +130,7 @@ const AuthForm = ({ mode, role, onSubmit, onModeChange, isLoading }: AuthFormPro
                   icon={Phone} 
                   id="phone" 
                   register={register} 
-                  error={(errors as FieldErrors<RegisterFormData>).phone} 
+                  error={errors.phone} 
                 />
               </div>
               <div className="flex-1">
@@ -138,7 +139,7 @@ const AuthForm = ({ mode, role, onSubmit, onModeChange, isLoading }: AuthFormPro
                   icon={MapPin} 
                   id="city" 
                   register={register} 
-                  error={(errors as FieldErrors<RegisterFormData>).city} 
+                  error={errors.city} 
                 />
               </div>
             </div>
@@ -173,7 +174,7 @@ const AuthForm = ({ mode, role, onSubmit, onModeChange, isLoading }: AuthFormPro
             id="confirmPassword" 
             type={showPassword ? "text" : "password"} 
             register={register} 
-            error={(errors as FieldErrors<RegisterFormData>).confirmPassword} 
+            error={errors.confirmPassword} 
           />
         )}
 

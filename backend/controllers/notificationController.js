@@ -70,4 +70,20 @@ const deleteNotification = asyncHandler(async (req, res) => {
     res.json({ success: true });
 });
 
-module.exports = { getNotifications, createNotification, markAsRead, markAllAsRead, deleteNotification };
+// @desc    Seed notifications for a user (DEMO ONLY)
+// @route   POST /api/notifications/seed/:userId
+const seedNotifications = asyncHandler(async (req, res) => {
+    const { userId } = req.params;
+    const items = [
+        { type: 'delay', title: 'Route 72N Delayed', message: 'Tirunelveli → Nagercoil is running 15 mins late due to traffic.', priority: 'high' },
+        { type: 'bus_arrival', title: 'Bus Coming Soon', message: 'The Junction Flyer is only 2 stops away from your location.', priority: 'medium' },
+        { type: 'system', title: 'Network Update', message: 'Buzzo Network has been upgraded to v2.4 with better AI-ETA.', priority: 'low' },
+        { type: 'route_alert', title: 'Critical Status', message: 'Major construction on Vannarpettai bridge. All loops rerouted.', priority: 'urgent' },
+        { type: 'chat', title: 'New Support Reply', message: 'Buzzo AI support has responded to your transit query.', priority: 'medium' },
+    ];
+
+    const results = await Notification.insertMany(items.map(i => ({ ...i, userId })));
+    res.json({ success: true, count: results.length });
+});
+
+module.exports = { getNotifications, createNotification, markAsRead, markAllAsRead, deleteNotification, seedNotifications };

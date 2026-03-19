@@ -14,7 +14,30 @@ dotenv.config({ path: path.join(__dirname, '.env') });
 
 // Define port - prioritize env variable, then default to 5001 (or 8082 if running as standalone/electron)
 // We will set PORT=8082 in the Electron environment
-const PORT = process.env.PORT || 5001;
+const PORT = Number(process.env.PORT) || 5002;
+
+// Graceful handling for port conflicts – try next port if in use
+const startServer = (port) => {
+  const serverInstance = server.listen(port);
+  
+  serverInstance.once('listening', () => {
+    console.log(`Server running on port ${port}`);
+  });
+
+  serverInstance.once('error', (err) => {
+    if (err.code === 'EADDRINUSE') {
+      console.warn(`Port ${port} in use, trying ${port + 1}`);
+      // Close the handle to allow re-listening on a different port safely
+      server.close(() => {
+          setTimeout(() => startServer(port + 1), 100);
+      });
+    } else {
+      console.error('Server error:', err);
+    }
+  });
+};
+
+
 
 
 // Connect to database
@@ -35,6 +58,11 @@ global.io = io;
 
 // Middleware
 app.use(cors());
+app.use((req, res, next) => {
+    res.setHeader('Cross-Origin-Opener-Policy', 'same-origin-allow-popups');
+    res.setHeader('Cross-Origin-Embedder-Policy', 'unsafe-none');
+    next();
+});
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
@@ -420,6 +448,4 @@ app.use(errorHandler);
 // const PORT = process.env.PORT || 5000;
 
 
-server.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
-});
+startServer(PORT);
