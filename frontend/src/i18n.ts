@@ -75,7 +75,13 @@ const resources = {
       "update_list": "UPDATE LIST",
       "load_more_buses": "Load More Buses",
       "no_buses_departing": "No buses currently departing",
-      "all_scheduled_buses_departed": "All scheduled buses for this route may have already departed or no results match your filters."
+      "all_scheduled_buses_departed": "All scheduled buses for this route may have already departed or no results match your filters.",
+      "hero_title_fast": "FASTER.",
+      "hero_title_smart": "SMARTER.",
+      "hero_title_global": "GLOBAL.",
+      "hero_network_status": "Live Network Active",
+      "neural_link_active": "NEURAL LINK ACTIVE",
+      "gps_telemetry_active": "GPS TELEMETRY ACTIVE"
     }
   },
   ta: {
@@ -150,7 +156,13 @@ const resources = {
       "update_list": "பட்டியலை புதுப்பி",
       "load_more_buses": "மேலும் பேருந்துகளை ஏற்றுக",
       "no_buses_departing": "தற்போது பேருந்துகள் புறப்படவில்லை",
-      "all_scheduled_buses_departed": "அனைத்து பேருந்துகளும் புறப்பட்டிருக்கலாம் அல்லது முடிவுகள் இல்லை."
+      "all_scheduled_buses_departed": "அனைத்து பேருந்துகளும் புறப்பட்டிருக்கலாம் அல்லது முடிவுகள் இல்லை.",
+      "hero_title_fast": "வேகம்.",
+      "hero_title_smart": "புத்திசாலித்தனம்.",
+      "hero_title_global": "உலகளாவிய.",
+      "hero_network_status": "நேரடி நெட்வொர்க் செயலில் உள்ளது",
+      "neural_link_active": "நியூரல் இணைப்பு செயலில் உள்ளது",
+      "gps_telemetry_active": "ஜிபிஎஸ் டெலிமெட்ரி செயலில் உள்ளது"
     }
   },
   hi: {
@@ -225,7 +237,13 @@ const resources = {
       "update_list": "सूची अद्यतन करें",
       "load_more_buses": "और बसें लोड करें",
       "no_buses_departing": "वर्तमान में कोई बस प्रस्थान नहीं कर रही है",
-      "all_scheduled_buses_departed": "सभी बसें प्रस्थान कर चुकी हैं या फ़िल्टर से मेल नहीं खाती हैं।"
+      "all_scheduled_buses_departed": "सभी बसें प्रस्थान कर चुकी हैं या फ़िल्टर से मेल नहीं खाती हैं।",
+      "hero_title_fast": "तेजी.",
+      "hero_title_smart": "होशियारी.",
+      "hero_title_global": "वैश्विक.",
+      "hero_network_status": "लाइव नेटवर्क सक्रिय",
+      "neural_link_active": "न्यूरल लिंक सक्रिय",
+      "gps_telemetry_active": "जीपीएस टेलीमेट्री सक्रिय"
     }
   }
 };

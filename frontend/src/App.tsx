@@ -26,6 +26,7 @@ import AlertsHub from "./pages/passenger/AlertsHub";
 import LiveRadar from "./pages/LiveRadar";
 import LiveTerminal from "./pages/LiveTerminal";
 import BusHeatmap from "./pages/admin/BusHeatmap";
+import AdminLogin from "./pages/admin/AdminLogin";
 import { useProximityAlerts } from "./hooks/useProximityAlerts";
 
 import ProtectedRoute from "./components/auth/ProtectedRoute";
@@ -47,7 +48,7 @@ const App = () => {
             
             <Sonner position="top-right" expand={false} richColors closeButton />
             
-            <BrowserRouter>
+            <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
               <div className="relative z-10 min-h-screen flex flex-col">
                 <Routes>
                   {/* Public Routes */}
@@ -59,7 +60,8 @@ const App = () => {
                   <Route path="/bus-directory" element={<BusDirectory />} />
                   <Route path="/bus/:id" element={<BusDetails />} />
                   <Route path="/live-radar" element={<LiveRadar />} />
-                  <Route path="/live-terminal" element={<LiveTerminal />} />
+                   <Route path="/live-terminal" element={<LiveTerminal />} />
+                   <Route path="/admin-login" element={<AdminLogin />} />
 
                     {/* Unified Dashboard Protected Route */}
                     {/* Notifications Page */}

@@ -8,6 +8,10 @@ export default defineConfig(({ mode }) => ({
     host: "::",
     port: 8082,
     strictPort: true,
+    headers: {
+      "Cross-Origin-Opener-Policy": "same-origin-allow-popups",
+      "Cross-Origin-Embedder-Policy": "unsafe-none",
+    },
     proxy: {
       "/api": {
         target: "http://127.0.0.1:5002",

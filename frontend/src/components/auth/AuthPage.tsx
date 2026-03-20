@@ -5,6 +5,7 @@ import { authService } from "@/services/authService";
 import { toast } from "sonner";
 import type { UserRole } from "@/types";
 import { GoogleLogin } from "@react-oauth/google";
+import { useTranslation } from "react-i18next";
 
 type AuthMode = "login" | "register";
 
@@ -15,6 +16,7 @@ interface AuthPageProps {
 }
 
 const AuthPage = ({ fixedRole, title, subtitle }: AuthPageProps) => {
+  const { t } = useTranslation();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   
@@ -266,7 +268,7 @@ const AuthPage = ({ fixedRole, title, subtitle }: AuthPageProps) => {
                   <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mb-4">
                      {mode === "login" ? "Confirm Authority Level" : "Select Your Role Authority"}
                   </p>
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                      {[
                        { id: 'user', label: 'Passenger', icon: User },
                        { id: 'driver', label: 'Driver', icon: Bus },

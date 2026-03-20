@@ -55,30 +55,30 @@ const Index = () => {
             <div className="text-center lg:text-left space-y-10">
               <div className="inline-flex items-center gap-3 px-6 py-2.5 rounded-full glass-premium border-white/10 text-teal-400 text-[10px] font-black uppercase tracking-[0.4em] mb-4 shadow-2xl animate-fade-in text-glow">
                 <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-neon-pulse" />
-                Live Network Active • Tirunelveli
+                {t('hero_network_status')} • Tirunelveli
               </div>
 
               <h1 className="text-6xl md:text-8xl lg:text-9xl font-black text-white leading-[0.85] tracking-tighter italic animate-slide-up">
-                FASTER. <br/>
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-emerald-500">SMARTER.</span> <br/>
-                GLOBAL.
+                {t('hero_title_fast')} <br/>
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-emerald-500">{t('hero_title_smart')}</span> <br/>
+                {t('hero_title_global')}
               </h1>
 
               <p className="text-xl md:text-2xl text-slate-400 max-w-xl mx-auto lg:mx-0 font-medium leading-relaxed animate-fade-in stagger-2">
-                The most advanced transit intelligence platform. Real-time telemetry, predictive ETA, and driver-verified updates.
+                {t('hero_subtitle')}
               </p>
 
               <div className="flex flex-col sm:flex-row gap-5 justify-center lg:justify-start pt-4 animate-fade-in stagger-3">
                 <Link to="/buses">
                   <Button className="h-16 px-12 bg-teal-500 hover:bg-teal-600 text-white font-black uppercase tracking-widest text-xs rounded-3xl shadow-glow transform hover:-translate-y-1 transition-all">
                     <Navigation className="w-5 h-5" />
-                    Launch Radar
+                    {t('track_buses_now')}
                   </Button>
                 </Link>
                 <Link to="/bus-directory">
                   <Button variant="outline" className="h-16 px-12 border-white/10 bg-white/5 text-white hover:bg-white/10 font-black uppercase tracking-widest text-xs rounded-3xl backdrop-blur-xl transition-all group">
                     <Search className="w-5 h-5" />
-                    Find Route
+                    {t('bus_directory')}
                     <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-2 transition-transform" />
                   </Button>
                 </Link>
@@ -135,7 +135,7 @@ const Index = () => {
 
                  <div className="absolute bottom-16 right-16 z-20 p-10 glass-premium rounded-[3rem] w-80 text-center animate-float-slow">
                     <Wifi className="w-10 h-10 mx-auto mb-6 text-teal-400 animate-neon-pulse" />
-                    <h3 className="text-xl font-black text-white uppercase tracking-tighter italic">NEURAL LINK ACTIVE</h3>
+                    <h3 className="text-xl font-black text-white uppercase tracking-tighter italic">{t('neural_link_active')}</h3>
                     <p className="text-xs text-slate-400 leading-relaxed mt-4 font-medium">Platform-wide telemetry synchronization established across all mobile units.</p>
                  </div>
               </div>
@@ -238,7 +238,7 @@ const Index = () => {
       {/* CTA Final */}
       <section className="py-32 mesh-bg relative overflow-hidden">
         <div className="section-container relative z-10 text-center">
-           <h2 className="text-6xl md:text-8xl font-black text-white tracking-widest italic mb-8">LAUNCH.</h2>
+           <h2 className="text-6xl md:text-8xl font-black text-white tracking-widest italic mb-8">{t('hero_title_fast')}</h2>
            <p className="text-2xl text-slate-400 mb-12 max-w-2xl mx-auto font-medium">Join the thousands of commuters moving smarter every day.</p>
            <div className="flex flex-col sm:flex-row gap-6 justify-center">
               <Link to="/auth?mode=register">
